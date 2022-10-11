@@ -3,8 +3,7 @@
 
 
 # function - removeUnwanted() - referenced in lines 63 - 109 of unified.y
-
-def removeUnwanted(input : str):
+def removeUnwanted(input : str) -> str:
 
     # ignore punctuations
     punctuationList = ["!",";",":","@","#","$","%","^","&","*",",",".","/","'","’","”","“","।"]
@@ -25,3 +24,37 @@ def removeUnwanted(input : str):
             output += c
     
     return output
+
+
+# function to replace GetFile in lines 132 - 156 of unified.y
+# gives the filename according to language and type
+def GetFile(LangId : int, type : int) -> str:
+
+    rootPath = "./" 
+    commonFile = "common"
+    fileName = rootPath
+
+    # return common file that contains the CPS mapping
+    if type == 0:
+        fileName += commonFile
+        return fileName
+    
+    elif type == 1:
+        fileName += "dict/"
+    
+    elif type == 2:
+        fileName += "rules/"
+
+    langIdNameMapping = { 1 : "malayalam", 2 : "tamil", 3 : "telugu",
+        4 : "kannada", 5 : "hindi", 6 : "bengali",
+        7 : "gujarathi", 8 : "odiya", 9 : "english" }
+    
+    if LangId in langIdNameMapping.keys():
+        fileName += langIdNameMapping[LangId]
+    
+    if type == 1:
+        fileName += ".dict"
+    elif type == 2:
+        fileName += ".rules"
+    
+    return fileName

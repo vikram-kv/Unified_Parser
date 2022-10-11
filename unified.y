@@ -19,8 +19,7 @@ char *syllableList[100]={}; //max syllable limit.
 int DEBUG=0, parseLevel=0, pruiningFlag=0, syllTagFlag=0, fliteHTSFlag=0, doubleParseSyl=0; directParseFlag=0;//parselevel - 0-mono 1-syll  //syldictFlag=0,
 //wordpronunciation   wordpronunciationunified   commonunified
 char *rootPath="./";
-char *commonFile = "common", *outputFile, *outputPruneFile="rag_pho";//
-//char phoneDelimiter ='*',syllableDelimiter = '#';
+char *commonFile = "common", *outputFile, *outputPruneFile="rag_pho";
 int writeFormat=0, LangSpecificCorrectionFlag=1; //0 - phone; 1 - syllable
 
 char *wordCopy, *syllabifiedWord, *phonifiedWord, *unicodeWord, *syllabifiedWordOut, *outputText;
