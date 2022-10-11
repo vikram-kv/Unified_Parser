@@ -73,7 +73,7 @@ char* RemoveUnwanted(char * input){
 
    //invisible char correction -not working
 	if(strstr(output, "﻿") != NULL)output =Utf8ReplaceAll("﻿","",output);
-
+   
    //hindi correction
 	if(strstr(output, "ऩ") != NULL)output =Utf8ReplaceAll("ऩ","ऩ",output);
    if(strstr(output, "ऱ") != NULL)output =Utf8ReplaceAll("ऱ","ऱ",output);
