@@ -1,5 +1,24 @@
 # contains helper functions used in parser.py
 
+# global CONSTANTs for languages. Uses the same values as the enum at 
+# lines 11-13 of unified.y
+
+MALAYALAM = 1
+TAMIL = 2
+TELUGU = 3
+KANNADA = 4
+HINDI = 5
+BENGALI = 6
+GUJARATHI = 7
+ODIYA = 8
+ENGLISH = 9
+
+langId = 0
+isSouth = False
+
+
+# variable to indicate current language being parsed.
+currLang = ENGLISH
 
 
 # function - removeUnwanted() - referenced in lines 63 - 109 of unified.y
@@ -58,3 +77,36 @@ def GetFile(LangId : int, type : int) -> str:
         fileName += ".rules"
     
     return fileName
+
+
+
+# function to replace SetlangId in lines 62-80 of unified.y
+
+def SetlangId(id : int):
+    if(id>=3328 and id<=3455):
+        currLang = MALAYALAM; #malayalam
+    elif(id>=2944 and id<=3055):
+        currLang = TAMIL; #tamil
+    elif(id>=3202 and id<=3311):
+        currLang = KANNADA; #KANNADA
+    elif(id>=3072 and id<=3198):
+        currLang = TELUGU; #telugu
+    elif(id>=2304 and id<=2431):
+        currLang = HINDI; #hindi
+    elif(id>=2432 and id<=2559):
+        currLang = BENGALI; #BENGALI
+    elif(id>=2688 and id<=2815):
+        currLang = GUJARATHI; #gujarathi
+    elif(id>=2816 and id<=2943):
+        currLang = ODIYA; #odia
+    elif(id>=64 and id<=123):
+        currLang = ENGLISH; #english
+
+    langId = currLang
+
+    if(langId < 5):
+        isSouth = 1
+    if(langId == 0):
+        print(f"UNKNOWN LANGUAGE - id = {id}")
+        exit(-1)
+    return 1
