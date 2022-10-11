@@ -45,6 +45,7 @@ def removeUnwanted(input : str) -> str:
     return output
 
 
+
 # function to replace GetFile in lines 132 - 156 of unified.y
 # gives the filename according to language and type
 def GetFile(LangId : int, type : int) -> str:
@@ -81,7 +82,6 @@ def GetFile(LangId : int, type : int) -> str:
 
 
 # function to replace SetlangId in lines 62-80 of unified.y
-
 def SetlangId(id : int):
     if(id>=3328 and id<=3455):
         currLang = MALAYALAM; #malayalam
