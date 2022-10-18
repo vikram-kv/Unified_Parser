@@ -27,8 +27,19 @@ class WORDS:
     syllabifiedWordOut = ""
     outputText = ""
 
+class STRINGS:
+    bi = 0
+    leftStr = ['' for _ in range(1100)]
+    rightStr = ['' for _ in range(1100)]
+    def refresh(self):
+        self.leftStr = ['' for _ in range(1100)]
+        self.rightStr = ['' for _ in range(1100)]
+        self.bi = 0
+
 flags = FLAGS()
 words = WORDS()
+combvars = STRINGS()
+
 MALAYALAM = 1
 TAMIL = 2
 TELUGU = 3
@@ -95,7 +106,6 @@ def removeUnwanted(input : str) -> str:
     return output
 
 
-
 # function to replace GetFile in lines 132 - 156 of unified.y
 # gives the filename according to language and type
 def GetFile(LangId : int, type : int) -> str:
@@ -126,7 +136,6 @@ def GetFile(LangId : int, type : int) -> str:
         fileName += ".rules"
     
     return fileName
-
 
 
 # function to replace SetlangId in lines 62-80 of unified.y
@@ -513,7 +522,7 @@ def GeminateCorrection(phone : str, isReverse : int) -> str:
     for i in range(0, 39):
         c1 = f'&{geminateList[i]}&eu&{geminateList[i]}&'
         c2 = f'&{geminateList[i]}&{geminateList[i]}&'
-        phonecopy = phonecopy.replace(c2, c1) if isReverse else phonecopy.replace(c1, c2)
+        phonecopy = phonecopy.replace(c2, c1) if isReverse == 1 else phonecopy.replace(c1, c2)
     
     return phonecopy
 
@@ -623,7 +632,6 @@ def CheckDictionary(input : str) -> int:
     return 0
 
 # replacement for function in lines 801-821. 
-
 def PositionCorrection(phone : str, left : str, right :str, isReverse:int) -> str:
 
     geminateList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh",
@@ -635,6 +643,194 @@ def PositionCorrection(phone : str, left : str, right :str, isReverse:int) -> st
         c2 = right
         c1 = c1.replace('@', geminateList[i])
         c2 = c2.replace('@', geminateList[i])
-        phonecopy = phonecopy.replace(c2, c1) if isReverse else phonecopy.replace(c1, c2)
+        phonecopy = phonecopy.replace(c2, c1) if isReverse == 1 else phonecopy.replace(c1, c2)
 
     return phonecopy
+
+# replacement for function in lines 711 - 713.
+def CountChars(s : str, c : str) -> int:
+
+    count = 0
+    for x in s:
+        if x == c:
+            count += 1
+
+    return count
+
+# replacement for function in lines 719 - 744.
+def GenerateAllCombinations(j : int, s : str, c : list, isRight : int):
+    global combvars
+    t = ''
+    if (c[j][0][0] == '#'):
+        if isRight == 1:
+            combvars.rightStr[combvars.bi] = s + '&'
+            combvars.bi += 1
+        else:
+            combvars.leftStr[combvars.bi] = s + '&'
+            combvars.bi += 1
+    else:
+        i = 0
+        while (c[j][i][0] != '#'):
+            t = s + '&' + c[j][i]
+            GenerateAllCombinations(j+1, t, c, isRight)
+            i += 1
+
+# replacement for function in lines 746 - 768.
+def GenerateMatrix(combMatrix : list, regex : str):
+
+    row = 0
+    col = 0
+    item = 0
+    global flags
+    for i in range(0, len(regex)):
+        if regex[i] == '&':
+            combMatrix[row][col+1] = '#'
+            row += 1
+            col = 0
+            item = 0
+            combMatrix[row][col] = ''
+        elif regex[i] == '|':
+            col += 1
+            item = 0
+            combMatrix[row][col] = ''     
+        else:
+            combMatrix[row][col] = combMatrix[row][col][:item] + regex[i] + combMatrix[row][col][(item+1):]
+            item += 1
+        if flags.DEBUG:
+            print(f'{row} {col} {combMatrix[row][col]}')
+
+    combMatrix[row][col+1] = '#'
+    combMatrix[row+1][0] = '#'
+
+# replacement for function in lines 770 - 799.
+def CombinationCorrection(phone : str, left : str, right : str, isReverse : int) -> str:
+    global combvars, flags
+    leftComb = [['' for _ in range(256)] for _ in range(256)]
+    rightComb = [['' for _ in range(256)] for _ in range(256)]
+    GenerateMatrix(leftComb, left)
+    GenerateMatrix(rightComb, right)
+
+    combvars.bi = 0
+    GenerateAllCombinations(0, '', leftComb, 0)
+    combvars.bi = 0
+    GenerateAllCombinations(0, '', rightComb, 1)
+
+    i = 0
+    phonecopy = phone
+    while combvars.leftStr[i] != '':
+        if isReverse == 1:
+            phonecopy = phonecopy.replace(combvars.rightStr[i], "!")
+            phonecopy = phonecopy.replace("!", combvars.leftStr[i])
+        else:
+            phonecopy = phonecopy.replace(combvars.leftStr[i], "!")
+            phonecopy = phonecopy.replace("!", combvars.rightStr[i])
+
+        if flags.DEBUG:
+            print(f'{combvars.leftStr[i]} {combvars.rightStr[i]}')
+        
+        i += 1
+    
+    combvars.refresh()
+    return phonecopy
+
+# replacement for function in lines 825 - 930. //Language specific corrections
+def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
+    global flags, isSouth, langId
+    phonecopy = phone
+
+    if isSouth:
+        phonecopy = phonecopy.replace("&ei&","&ai&")
+        phonecopy = phonecopy.replace("&eiv&","&aiv&")
+    else:
+        phonecopy = phonecopy.replace("&oo&","&o&")
+        phonecopy = phonecopy.replace("&oov&","&ov&")
+
+    phonecopy = phonecopy.replace("&q&","!")
+    phonecopy = phonecopy.replace("!","&av&q&")
+
+    phonecopy = phonecopy.replace("&a&av&","&a&")
+    phonecopy = phonecopy.replace("&e&av&","&e&")
+    phonecopy = phonecopy.replace("&i&av&","&i&")
+    phonecopy = phonecopy.replace("&o&av&","&o&")
+    phonecopy = phonecopy.replace("&u&av&","&u&")
+
+    phonecopy = phonecopy.replace("&a&rqv&","&rq&")
+    phonecopy = phonecopy.replace("&aa&av&","&aa&")
+    phonecopy = phonecopy.replace("&ae&av&","&ae&")
+    phonecopy = phonecopy.replace("&ax&av&","&ax&")
+    phonecopy = phonecopy.replace("&ee&av&","&ee&")
+    phonecopy = phonecopy.replace("&ii&av&","&ii&")
+    phonecopy = phonecopy.replace("&ai&av&","&ai&")
+    phonecopy = phonecopy.replace("&au&av&","&au&")
+    phonecopy = phonecopy.replace("&oo&av&","&oo&")
+    phonecopy = phonecopy.replace("&uu&av&","&uu&")
+    phonecopy = phonecopy.replace("&rq&av&","&rq&")
+    phonecopy = phonecopy.replace("&av&av&","&av&")
+    phonecopy = phonecopy.replace("&ev&av&","&ev&")
+    phonecopy = phonecopy.replace("&iv&av&","&iv&")
+    phonecopy = phonecopy.replace("&ov&av&","&ov&")
+    phonecopy = phonecopy.replace("&uv&av&","&uv&")
+
+    phonecopy = phonecopy.replace("&av&rqv&","&rqv&")
+    phonecopy = phonecopy.replace("&aav&av&","&aav&")
+    phonecopy = phonecopy.replace("&aev&av&","&aev&")
+    phonecopy = phonecopy.replace("&auv&av&","&auv&")
+    phonecopy = phonecopy.replace("&axv&av&","&axv&")
+    phonecopy = phonecopy.replace("&aiv&av&","&aiv&")
+    phonecopy = phonecopy.replace("&eev&av&","&eev&")
+    phonecopy = phonecopy.replace("&eiv&av&","&eiv&")
+    phonecopy = phonecopy.replace("&iiv&av&","&iiv&")
+    phonecopy = phonecopy.replace("&oov&av&","&oov&")
+    phonecopy = phonecopy.replace("&ouv&av&","&ouv&")
+    phonecopy = phonecopy.replace("&uuv&av&","&uuv&")
+    phonecopy = phonecopy.replace("&rqv&av&","&rqv&")
+
+    if langSpecFlag == 0:
+        return phonecopy
+    
+    fileName = GetFile(langId, 2)
+    with open(fileName, 'r') as output:
+        cnts = output.readlines()
+
+    left = ''
+    right = ''
+    phonecopy = '^' + phonecopy + '$'
+
+    if (flags.DEBUG):
+        print(f'phone : {phone}')
+    
+    for l in cnts:
+        l = l.strip()
+        if (l.find('#') != -1):
+            continue
+        
+        l = l.split('\t')
+        assert(len(l) == 2)
+        left, right = l[0], l[1]
+
+        if left.find('|') != -1:
+            a1 = left[1:-1]
+            a2 = right[1:-1]
+            phonecopy = CombinationCorrection(phonecopy, a1, a2, 0)
+            if flags.DEBUG:
+                print(f'{a1}\t{a2}')
+        elif left.find('@') != -1:
+            phonecopy = PositionCorrection(phonecopy, left, right, 0)
+        else:
+            phonecopy = phonecopy.replace(left, '!')
+            phonecopy = phonecopy.replace('!', right)
+
+    # //remove head and tail in phone
+    phonecopy = phonecopy.replace('^', '')
+    phonecopy = phonecopy.replace('$', '')
+    # //end correction
+    count = 0
+    for i in range(len(phonecopy)):
+        if phonecopy[i] == '&':
+            count = i
+    return phonecopy[:(count+1)]
+
+
+
+
+

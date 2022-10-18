@@ -1,2 +1,6 @@
 i) add argparse code in parser.py 
 ii) complete helpers.py 
+iii) maybe replace continuous "chained" replaces into a single replace to boost 
+     performance
+iv) make LangSpecificCorrection() function more conscise to follow by removing several calls to replace
+using a list, map and a loop to do the corrections instead
