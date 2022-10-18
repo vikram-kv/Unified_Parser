@@ -4,6 +4,7 @@
 # lines 11-13 of unified.y
 
 
+from dataclasses import replace
 import re
 from sys import flags
 
@@ -620,3 +621,20 @@ def CheckDictionary(input : str) -> int:
             return 1
 
     return 0
+
+# replacement for function in lines 801-821. 
+
+def PositionCorrection(phone : str, left : str, right :str, isReverse:int) -> str:
+
+    geminateList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh",
+    "n","p","ph","b","bh","m","y","r","l","w","sh","sx","zh","y","s","h","f","dxq"]
+
+    phonecopy = phone
+    for i in range(0,39):
+        c1 = left
+        c2 = right
+        c1 = c1.replace('@', geminateList[i])
+        c2 = c2.replace('@', geminateList[i])
+        phonecopy = phonecopy.replace(c2, c1) if isReverse else phonecopy.replace(c1, c2)
+
+    return phonecopy
