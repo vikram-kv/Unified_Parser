@@ -38,7 +38,7 @@ t_TIMES = r'\*'
 t_DIVIDE = r'/'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
-t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
+t_NAME = r'[a-zA-Z_अ][a-zA-Z0-9_]*'
 
 # A function can be used if there is an associated action.
 # Write the matching regex in the docstring.
@@ -122,5 +122,5 @@ def p_error(p):
 parser = yacc()
 
 # Parse an expression
-ast = parser.parse('2 * 345 \n+ 4 * (5 - 1)')
+ast = parser.parse('2 * 345 \n+ 4 * (अabc - 1)')
 print(ast)

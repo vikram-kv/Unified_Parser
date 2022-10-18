@@ -4,10 +4,8 @@
 # lines 11-13 of unified.y
 
 
-from dataclasses import replace
+import re
 from sys import flags
-from tkinter import W
-
 
 class FLAGS:
     DEBUG = 0
@@ -219,7 +217,6 @@ def ConvertToSymbols(input : str) -> str:
     return output
 
 
-
 # function in lines 1278 - 1299. write to wordpronunciation file
 def WriteFile(text : str):
     global flags, outputFile
@@ -362,17 +359,264 @@ def CleanseWord(phone : str) -> str:
     return phonecopy
 
 
+# replacement for funciton in lines 321 - 356. Correct if there is a vowel in the middle
+def MiddleVowel(phone : str) -> str:
+
+    c1 = ''
+    c2 = ''
+    phonecopy = phone
+    for i in range(CONSONANTSSIZE):
+        for j in range(VOWELSSIZE):
+            c1 = f'&{CONSONANTS[i]}&{VOWELS[j]}&'
+            c2 = f'&{CONSONANTS[i]}&av&{VOWELS[j]}&'
+
+            phonecopy = phonecopy.replace(c1, '@')
+            phonecopy = phonecopy.replace('@', c2)
+
+    for i in range(SEMIVOWELSSIZE):
+        for j in range(VOWELSSIZE):
+            c1 = f'&{SEMIVOWELS[i]}&{VOWELS[j]}&'
+            c2 = f'&{SEMIVOWELS[i]}&av&{VOWELS[j]}&'
+
+            phonecopy = phonecopy.replace(c1, '@')
+            phonecopy = phonecopy.replace('@', c2)
+
+    return phonecopy
 
 
-''' !!!!!!!!!!!!!!!!!! NOT COMPLETE !!!!!!!!!!!!!!!!!! '''
+# replacement for function in lines 435 - 459. //cant use this as break syllable rules. 
+# NOT USED ANYWHERE
+def DoubleModifierCorrection(phone : str) -> str:
 
-# replacement for function in lines 278 - 317. check the word in Dict
+    doubleModifierList = ["&nwv&","&nnv&","&rwv&","&lwv&","&lnv&","&aav&","&iiv&","&uuv&","&rqv&","&eev&",
+    "&eiv&","&ouv&","&axv&","&oov&","&aiv&","&auv&","&aev&",
+    "&iv&","&ov&","&ev&","&uv&"]
 
-def CheckDictionary(input : str) -> int:
-    global flags, langId
-    fileName = GetFile(langId, 1)
-    if flags.DEBUG:
-        print(f"dict : {fileName}\n")
+    phonecopy = phone
+    for i in range(0,21):
+        for j in range(0,21):
+            c1 = f'{doubleModifierList[i]}#{doubleModifierList[j]}'
+            c2 = f'{doubleModifierList[i]}{doubleModifierList[j]}#&'
+
+            phonecopy = phonecopy.replace(c1, '@')
+            phonecopy = phonecopy.replace('@', c2)
+
+
+    if (phonecopy.find("&#&hq&") != -1):
+        phonecopy = phonecopy.replace("&#&hq&","&hq&#&")
     
+    if (phonecopy.find("&&") != -1):
+        phonecopy = phonecopy.replace("&&","&")
+    
+    return phonecopy
+
+
+
+# replacement for funciton in lines 462 - 495. //for eu&C&C&V
+
+def SchwaDoubleConsonent(phone : str) -> str:
+
+    consonentList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh","n","p","ph","b","bh","m","y","r","l","w","sh","sx","zh","y","s","h","f","dxq"]
+    vowelList = ["av&","nwv&","nnv&","rwv&","lwv&","lnv&","aav&","iiv&","uuv&","rqv&","eev&","eiv&","ouv&",
+    "axv&","oov&","aiv&","nnx&","nxx&","rrx&","llx&","lxx&",
+    "aa&","iv&","ov&","mq&","aa&","ii&","uu&","rq&",
+    "ee&","ei&","ou&","oo&","ax&","ai&","ev&","uv&",
+    "a&","e&","i&","o&","u&"]
+
+    for i in range(0,39):
+        for j in range(0,39):
+            for k in range(0,42):
+
+                c1 = f'&euv&{consonentList[i]}&{consonentList[j]}&{vowelList[k]}'
+                c2 = f'&euv&{consonentList[i]}&av&{consonentList[j]}&{vowelList[k]}'
+                phonecopy = phonecopy.replace(c1, '@')
+                phonecopy = phonecopy.replace('@', c2)
+
+    if (phonecopy.find("$") != -1):
+        phonecopy = phonecopy.replace("$","")
+    
+    return phonecopy
+
+
+# replacement for function in lines 498 - 585. //halant specific correction for aryan langs
+def SchwaSpecificCorrection(phone : str) -> str:
+
+    global flags
+    schwaList = ["k","kh","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh",
+    "nx","t","th","d","dh","n","p","ph","b","bh","m","y",
+    "r","l","s","w","sh","sx","zh","h","lx","rx","f","dxq"]
+
+    vowelList = ["av&","nwv&","nnv&","rwv&","lwv&","lnv&","aav&","iiv&","uuv&","rqv&","eev&","eiv&","ouv&",
+    "axv&","oov&","aiv&","nnx&","nxx&","rrx&","llx&","lxx&",
+    "aa&","iv&","ov&","mq&","aa&","ii&","uu&","rq&",
+    "ee&","ei&","ou&","oo&","ax&","ai&","ev&","uv&",
+    "a&","e&","i&","o&","u&"]
+
+    if (flags.DEBUG):
+        print(f'{len(phone)}\n')
+    
+    phonecopy = phone + '!'
+
+    if (flags.DEBUG):
+        print(f'phone cur - {phonecopy}\n')
+    
+    # // for end correction &av&t&aav&. //dont want av
+    for i in range(0,38):
+        for j in range(1,42):
+            c1 = f'&av&{schwaList[i]}&{vowelList[j]}!'
+            c2 = f'&euv&{schwaList[i]}&{vowelList[j]}!'
+            phonecopy = phonecopy.replace(c1, '@')
+            phonecopy = phonecopy.replace('@', c2)
+    
+    phonecopy = phonecopy.replace('!', '')
+
+    for i in range(0,38):
+        c1 = f'&av&{schwaList[i]}&av&'
+        c2 = f'&euv$&{schwaList[i]}&av$&'
+        phonecopy = phonecopy.replace(c1, '@')
+        phonecopy = phonecopy.replace('@', c2)
+
+    if(flags.DEBUG):
+        print(f"inside schwa{phonecopy}\n")
+    
+
+    for i in range(0,38):
+        c1 = f'&av&{schwaList[i]}&'
+        c3 = f'&{schwaList[i]}&'
+
+        for j in range(0,41):
+            c4 = f'&euv&{c3}${vowelList[j]}'
+            c2 = f'c1{vowelList[j]}'
+            phonecopy = phonecopy.replace(c2, '@')
+            phonecopy = phonecopy.replace('@', c4)
+
+    phonecopy = phonecopy.replace("$","")
+
+    #//&q&w&eu&
+    for i in range(0,39):
+        c1 = f'&q&{schwaList[i]}&euv&'
+        c2 = f'&q&{schwaList[i]}&av&'
+        phonecopy = phonecopy.replace(c1, '@')
+        phonecopy = phonecopy.replace('@', c2)
+
+    return phonecopy
+
+# replacement for function in lines . //correct the geminate syllabification ,isReverse --reverse correction
+
+def GeminateCorrection(phone : str, isReverse : int) -> str:
+
+    geminateList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh","n","p","ph","b","bh","m","y",
+    "r","l","w","sh","sx","zh","y","s","h","f","dxq"]
+
+    phonecopy = phone
+    for i in range(0, 39):
+        c1 = f'&{geminateList[i]}&eu&{geminateList[i]}&'
+        c2 = f'&{geminateList[i]}&{geminateList[i]}&'
+        phonecopy = phonecopy.replace(c2, c1) if isReverse else phonecopy.replace(c1, c2)
+    
+    return phonecopy
+
+
+# replacement for function in  lines 356 - 430.  //Syllabilfy the words
+
+def Syllabilfy(phone : str) -> str:
+
+    phonecopy = phone
+
+    phonecopy = phonecopy.replace("&&","&")
+    phonecopy = phonecopy.replace("&eu&","@")
+    phonecopy = phonecopy.replace("@","&eu&#&")
+
+
+    phonecopy = phonecopy.replace("&euv&","@")
+    phonecopy = phonecopy.replace("@","&euv&#&")
+    phonecopy = phonecopy.replace("&avq","&q&av")
+    phonecopy = phonecopy.replace("&av&","@")
+    phonecopy = phonecopy.replace("@","&av&#&")
+    phonecopy = phonecopy.replace("&q","@")
+    phonecopy = phonecopy.replace("@","&q&#")
+
+    removeList = ["&nwv&","&nnv&","&rwv&","&lwv&","&lnv&","&aav&","&iiv&","&uuv&","&rqv&","&eev&",
+                "&eiv&","&ouv&","&axv&","&oov&","&aiv&","&auv&","&aev&",
+                "&nnx&","&nxx&","&rrx&","&llx&","&lxx&",
+                "&aa&","&iv&","&ov&","&mq&","&aa&","&ii&","&uu&","&rq&","&au&","&ee&",
+                "&ei&","&ou&","&oo&","&ax&","&ai&","&ev&","&uv&","&ae&",
+                "&a&","&e&","&i&","&o&","&u&"]
+
+    for i in range(0,45):
+        c1 = removeList[i]
+        c2 = c1 + '#&'
+        phonecopy = phonecopy.replace(c1, '@')
+        phonecopy = phonecopy.replace('@', c2)
+
+    
+    phonecopy = phonecopy.replace("&#&hq&","&hq&#&")
+
+    # //for vowel in between correction
+    pureVowelList = ["&a&","&e&","&i&","&o&","&u&"]
+    for i in range(0,5):
+        c1 = f'&#{pureVowelList[i]}'
+        phonecopy = phonecopy.replace(pureVowelList[i], '@')
+        phonecopy = phonecopy.replace('@', c1)
+    
+    
+    consonantList = ["k","kh","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh",
+                    "nx","t","th","d","dh","n","p","ph","b","bh","m","y",
+                    "r","l","w","sh","sx","zh","y","s","h","lx","rx","f","dxq"]
+
+    # // &eu&#&r&eu&#& syllabification correction
+
+    for i in range(0,39):
+        c1 = f'&eu&#&{consonantList[i]}&euv&#&'
+        c2 = f'&eu&{consonantList[i]}&av&#&'
+        phonecopy = phonecopy.replace(c1, '@')
+        phonecopy = phonecopy.replace('@', c2)
+
+    for i in range(0,39):
+        c1 = f'&euv&#&{consonantList[i]}&euv&#&'
+        c2 = f'&euv&{consonantList[i]}&av&#&'
+        phonecopy = phonecopy.replace(c1, '@')
+        phonecopy = phonecopy.replace('@', c2)
+
+    phonecopy = phonecopy.replace("&eu&","@")
+    phonecopy = phonecopy.replace("@","&eu&#&")
+    return phonecopy
+
+
+# replacement for function in lines 279 - 317. //check the word in Dict.
+# REMOVED EXIT(1) ON ENGLISH. WAS USELESS
+def CheckDictionary(input : str) -> int:
+
+    global langId, flags
+    fileName = GetFile(langId, 1)
+    if (flags.DEBUG):
+        print(f'dict : {fileName}')
+    
+    with open(fileName, 'r') as output:
+        cnts = output.readlines()
+
     if (langId == ENGLISH):
-        pass
+        input1 = ''
+        for c in input:
+            if ord(c) < 97:
+                c = c.lower()
+            input1 += c
+        input = input1
+    
+    for l in cnts:
+        l = l.strip().split('\t')
+        assert(len(l) == 3)
+        if flags.DEBUG:
+            print(f"word : {l[0]}\n")
+        if input == l[0]:
+            if flags.DEBUG:
+                print(f"match found")
+                print(f'Syllables : {l[1]}')
+                print(f'monophones : {l[2]}')
+            if flags.writeFormat == 1:
+                WriteFile(l[1])
+            if flags.writeFormat == 0:
+                WriteFile(l[2])
+            return 1
+
+    return 0

@@ -1,7 +1,7 @@
+with open('dict/english.dict', 'r') as f:
+    cnts = f.readlines()
 
-file = open('./common', 'r')
 
-
-lines = file.readlines()
-
-print(lines)
+for l in  cnts:
+    l = l.strip()
+    print(l)
