@@ -797,7 +797,7 @@ def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
     phonecopy = '^' + phonecopy + '$'
 
     if (flags.DEBUG):
-        print(f'phone : {phone}')
+        print(f'phone : {phonecopy}')
     
     for l in cnts:
         l = l.strip()
@@ -834,3 +834,58 @@ def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
 
 
 
+# Replacement for function in lines 934 - 991. //Reverse syllable correction for syllable parsing
+def SyllableReverseCorrection(phone : str, langSpecFlag : int) -> str:
+    global flags, isSouth, langId
+    phonecopy = phone
+
+    if isSouth:
+        phonecopy = phonecopy.replace("&ai&","&ei&")
+        phonecopy = phonecopy.replace("&aiv&","&eiv&")
+    else:
+        phonecopy = phonecopy.replace("&o&","&oo&")
+        phonecopy = phonecopy.replace("&ov&","&oov&")
+    
+    if langSpecFlag == 0:
+        return phonecopy
+
+    fileName = GetFile(langId, 2)
+    with open(fileName, 'r') as output:
+        cnts = output.readlines()
+
+    left = ''
+    right = ''
+    # //update head and tail in phone
+    phonecopy = '^' + phonecopy + '$'
+
+    if (flags.DEBUG):
+        print(f'before phone : {phonecopy}')
+    
+    for l in cnts:
+        l = l.strip()
+        if (l.find('#') != -1):
+            continue
+        
+        l = l.split('\t')
+        assert(len(l) == 2)
+        left, right = l[0], l[1]
+
+        if left.find('|') != -1:
+            a1 = left[1:-1]
+            a2 = right[1:-1]
+            phonecopy = CombinationCorrection(phonecopy, a1, a2, 1)
+            if flags.DEBUG:
+                print(f'{a1}\t{a2}')
+        elif left.find('@') != -1:
+            phonecopy = PositionCorrection(phonecopy, left, right, 1)
+        else:
+            phonecopy = phonecopy.replace(right, '!')
+            phonecopy = phonecopy.replace('!', left)
+
+    # //remove head and tail in phone
+    phonecopy = phonecopy.replace('^', '')
+    phonecopy = phonecopy.replace('$', '')
+    # //end correction
+    if (flags.DEBUG):
+        print(f'after phone : {phonecopy}')
+    return phonecopy

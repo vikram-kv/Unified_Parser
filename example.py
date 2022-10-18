@@ -31,6 +31,8 @@ tokens = ( 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN',
 # Ignored characters
 t_ignore = ' \t'
 
+cntr = 0
+
 # Token matching rules are written as regexs
 t_PLUS = r'\+'
 t_MINUS = r'-'
@@ -44,7 +46,9 @@ t_NAME = r'[a-zA-Z_अ][a-zA-Z0-9_]*'
 # Write the matching regex in the docstring.
 def t_NUMBER(t):
     r'[0-9]+'
+    global cntr
     t.value = int(t.value)
+    cntr += 1
     return t
 
 # Error handler for illegal characters
@@ -53,7 +57,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 # Build the lexer object
-lexer = lex(debug=True)
+lexer = lex()
     
 # --- Parser
 
@@ -122,5 +126,9 @@ def p_error(p):
 parser = yacc()
 
 # Parse an expression
-ast = parser.parse('2 * 345 \n+ 4 * (अabc - 1)')
+ast = parser.parse('2 * 345 + 4 * (अabc - 1)')
+
 print(ast)
+print(f'\t\t\t\n\n\n\n{cntr}')
+ast = parser.parse('2 * 345 + (4 + 4 * (1 - 1))')
+print(f'\t\t\t\n\n\n\n{cntr}')
