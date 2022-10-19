@@ -4,7 +4,7 @@
 # lines 11-13 of unified.y
 
 class FLAGS:
-    DEBUG = 0
+    DEBUG = False
     parseLevel = 0
     pruiningFlag = 0
     syllTagFlag = 0
@@ -77,8 +77,8 @@ SEMIVOWELS = ["y","r","l","w","sh","sx","zh","s","h","lx","rx","f","dxq"]
 currLang = ENGLISH
 
 
-# function - removeUnwanted() - referenced in lines 63 - 109 of unified.y
-def removeUnwanted(input : str) -> str:
+# function - RemoveUnwanted() - referenced in lines 63 - 109 of unified.y
+def RemoveUnwanted(input : str) -> str:
 
     # ignore punctuations
     punctuationList = ["!",";",":","@","#","$","%","^","&","*",",",".","/","'","’","”","“","।"]

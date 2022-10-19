@@ -3,9 +3,10 @@
 from ply.lex import lex
 from ply.yacc import yacc
 from helpers import *
+import sys
 
 # tokens identified by the lexer
-tokens = ('space', 'fullvowel_a', 'fullvowel_b', 'kaki_a', 'kaki_b', 'kaki_c', 'conjsyll2_a', 'conjsyll2_b', 'conjsyll2_c'
+tokens = ('fullvowel_a', 'fullvowel_b', 'kaki_a', 'kaki_b', 'kaki_c', 'conjsyll2_a', 'conjsyll2_b', 'conjsyll2_c',
 'conjsyll1', 'nukchan_a','nukchan_b', 'yarule', 'consonant', 'vowel', 'halant', 'matra')
 
 # lexical analyzer part
@@ -40,6 +41,10 @@ def t_kaki_c(t):
     ans = ans[:(len(ans) - 7)]
     t.value = ans
     return t
+
+def t_error(t):
+    print('Lexer error')
+    exit(1)
 
 # parser part
 
@@ -95,7 +100,112 @@ def p_syltoken(p):
     '''
     p[0] = p[1]
 
-if __name__ == '__main__':
+def p_error(p):
+    print('parse error')
+    exit(1)
+
+# //print the help of syntax
+def printHelp():
+
+    print("UnifiedParser : v3.0")
+    print("Usage : ./unified-parser word LangSpecificCorrection WriteFormat ForSylldict IsPruning DirectParse LangId timestamp")
+    print("LangSpecificCorrection : \n\t0-No\n\t1-Yes")
+    print("WriteFormat : \n\t0-Phone\n\t1-Syllable")
+    print("ForSylldict : writes output to wordpronunciationsyldict\n\t0-No\n\t1-Yes")
+    print("IsPruning : writes output for pruning format\n\t0-No\n\t1-Yes")
+    print("DirectParse : No UTF-8 to CLS conversion\n\t0-No\n\t1-Yes")
+    print("LangId : lang id for direct parsing\t0-8")
+    print("timestamp : append this to wordpronunciation\tstring")
+
+    print("Example: ./unified-parser 1 0 0 0 - Monophone parser")
+    print("Example: ./unified-parser 1 1 0 0 - Syllable parser")
+    print("Example: ./unified-parser 1 2 0 0 - Aksharas parser")
+    print("Example: ./unified-parser 1 3 0 0 - Direct parser for USS fallback")
+    print("Example: ./unified-parser 1 4 0 0 - Syllable parser with beg mid end")
+
+def main():
+    global flags, words, outputFile, langId
     lexer = lex()
     parser = yacc()
+
+    argc = len(sys.argv)
+    argv = sys.argv
+
+    if argc <= 5:
+        print('READ HELP!!')
+        exit(1)
+    
+    if argv[2] != '1':
+        flags.LangSpecificCorrectionFlag = 0
+    
+    flags.writeFormat = int(argv[3])
+    if argv[3] == '4':
+        flags.writeFormat = 1
+        flags.syllTagFlag = 1
+    
+    if argv[4] == '1':
+        outputFile = 'wordpronunciationsyldict'
+    
+    if argv[5] == '1':
+        flags.pruiningFlag = 1
+        outputFile = 'wordpronunciation'
+        flags.writeFormat = 3
+    
+    if argc > 6 and argv[6] == '1':
+        flags.directParseFlag = 1
+        langId = int(argv[7])
+    
+    if argc > 8:
+        outputFile = 'wordpronunciation' + argv[8]
+    else:
+        outputFile = 'wordpronunciation'
+        if argv[4] == '1':
+            outputFile = 'wordpronunciationsyldict'
+    
+    word = argv[1]
+    if flags.DEBUG:
+        print(f'Word {word}')
+    
+    if flags.directParseFlag != 1:
+        word = RemoveUnwanted(word)
+    if flags.DEBUG:
+        print(f'Cleared Word : {word}')
+    
+    if SetlanguageFeat(word) == 0:
+        return 0
+    if flags.directParseFlag == 1:
+        langId = int(argv[7])
+    
+    if CheckDictionary(word) != 0:
+        return 0
+    if flags.DEBUG:
+        print(f'langId : {langId}')
+    word = ConvertToSymbols(word)
+    if flags.directParseFlag == 1:
+        words.syllabifiedWord = argv[1]
+        print(f'{word}')
+    
+    if flags.DEBUG:
+        print(f"Symbols code : {words.unicodeWord}");
+        print(f"Symbols syllables : {words.syllabifiedWord}");
+
+    parser.parse(words.syllabifiedWord)
+
+    if flags.DEBUG:
+        print(f'Syllabified Word : {words.syllabifiedWordOut}')
+    
+    words.syllabifiedWordOut = words.syllabifiedWordOut.replace("&#&","&") + '&'
+    if flags.DEBUG:
+        print(f'Syllabified Word out : {words.syllabifiedWordOut}')
+
+    words.syllabifiedWordOut = LangSpecificCorrection(words.syllabifiedWordOut, flags.LangSpecificCorrectionFlag)
+    if flags.DEBUG:
+        print(f'Syllabified Word langCorr : {words.syllabifiedWordOut}')
+    words.syllabifiedWordOut = CleanseWord(words.syllabifiedWordOut)
+    if flags.DEBUG:
+        print(f'Syllabified Word memCorr : {words.syllabifiedWordOut}')
+   
+
+if __name__ == '__main__':
+    main()
     pass
