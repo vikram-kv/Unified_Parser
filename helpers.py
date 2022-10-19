@@ -4,6 +4,7 @@
 # lines 11-13 of unified.y
 
 
+from curses import flash
 from dataclasses import replace
 import re
 from sys import flags
@@ -244,7 +245,7 @@ def WriteFile(text : str):
     output.write("))\n")
 
     output.close()
-    if ((not flags.writeFormat) and flags.pruiningFlag):
+    if (flags.writeFormat == 0 and flags.pruiningFlag == 1):
         WritePruneFile(text)
 
 
@@ -357,7 +358,7 @@ def CleanseWord(phone : str) -> str:
     phonecopy = ""
 
     for c in phone:
-        if ((not (c == '&')) and (not isEngLetter(c))):
+        if (c != '&' and isEngLetter(c) == 0):
             c = '#'
         phonecopy += c
 
@@ -889,3 +890,148 @@ def SyllableReverseCorrection(phone : str, langSpecFlag : int) -> str:
     if (flags.DEBUG):
         print(f'after phone : {phonecopy}')
     return phonecopy
+
+# //language specific syllable correction
+def LangSyllableCorrection(input : str) -> int:
+    if input == "&av&q&":
+        return 1
+    else:
+        return 0
+
+# replacement for function in lines 1000 - 1160. //split into syllable array
+def SplitSyllables(input : str) -> int:
+
+    global flags, syllableList, syllableCount
+    incopy = input
+
+    if flags.writeFormat == 2:
+        i = 0
+        j = 0
+        fullList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh","n","p","ph","b","bh","m","y","r","l","w","sh","sx","zh","y","s","h","f","dxq"]
+
+        for i in range(0,39):
+            for j in range(0,39):
+                c1 = f'&{fullList[i]}&{fullList[j]}&'
+                c2 = f'&{fullList[i]}&euv&#&{fullList[j]}&'
+                incopy = incopy.replace(c1, '@')
+                incopy = incopy.replace('@', c2)
+        
+        incopy = incopy.replace("&#&mq&","&mq&")
+        incopy = incopy.replace("&#&q&","&q&")
+
+
+    pch = incopy.split('#')
+    syllableList = []
+    for c in pch:
+        if c != '&':
+            syllableList.append(c)
+    
+    # ln -> len
+    ln = len(syllableList)
+
+    if flags.DEBUG:
+        for i in range(len):
+            print(f"initStack : {syllableList[i]}\n")
+    
+    # //south specific av addition
+    if CheckVowel(syllableList[ln-1],1,0) == 0 and CheckChillu(syllableList[ln-1]) == 0:
+        if isSouth:
+            syllableList[ln-1] += '&av&'
+        else:
+            syllableList[ln-1] += '&euv&'
+
+    # //round 2 correction
+
+    if flags.writeFormat == 2:
+        syllableCount = ln
+        flags.writeFormat = 1
+        return 1
+
+    euFlag = 1
+    if ln > 1:
+        for i in range(ln-1,-1,-1):
+            if LangSyllableCorrection(syllableList[i]) == 1:
+                syllableList[i-1] += syllableList[i]
+                syllableList[i] = ''
+
+            if syllableList[i].find("&eu&") != -1:
+                syllableList[i] = syllableList[i].replace("&eu&", "!")
+                euFlag = 1
+
+            if syllableList[i].find("&euv&") != -1:
+                syllableList[i] = syllableList[i].replace("&euv&", "!")
+                euFlag = 2
+            
+            if CheckVowel(syllableList[i],0,1) == 0:
+                if i-1 >= 0:
+                    syllableList[i-1] += syllableList[i]
+                    syllableList[i] = ''
+                else:
+                    syllableList[i] += syllableList[i+1]
+                    syllableList[i+1] = ''
+            
+            if i-1 > 0:
+                if euFlag == 1:
+                    syllableList[i-1] = syllableList[i-1].replace("!","&eu&")
+                elif euFlag == 2:
+                    syllableList[i-1] = syllableList[i-1].replace("!","&euv&")
+                syllableList[i-1] = syllableList[i-1].replace("&&","&")
+            
+            if euFlag == 1:
+                syllableList[i] = syllableList[i].replace("!","&eu&")
+            elif euFlag == 2:
+                syllableList[i] = syllableList[i].replace("!","&euv&")
+    else:
+        print(f" syll 0 {syllableList[0]}")
+        if (CheckVowel(syllableList[0],1,0) == 0 and flags.writeFormat != 3) or Checkeuv(syllableList[0]) == 1:
+            syllableList[0] += '&av'
+
+    if flags.DEBUG:
+        for i in range(ln):
+            print(f'syllablifiedStack : {syllableList[i]}')
+
+    # //round 3 double syllable correction
+    for i in range(ln):
+
+        # //corrections
+        syllableList[i] = syllableList[i].replace('1','')
+        if flags.DEBUG:
+            print(f'LenStack : {len(syllableList[i])}')
+        
+        if len(syllableList[i]) > 0:
+            if syllableList[i].find("&eu&") != -1:
+                syllableList[i] = syllableList[i].replace("&eu&", "!")
+                euFlag = 1
+
+            if syllableList[i].find("&euv&") != -1:
+                syllableList[i] = syllableList[i].replace("&euv&", "!")
+                euFlag = 2
+            
+            if CheckVowel(syllableList[i],0,1) == 0 and flags.writeFormat != 3:
+                if flags.DEBUG:
+                    print(f'Stack : {syllableList[i]}')
+                syllableList[i] += '&av'
+            
+            if syllableList[i].find('!') != -1:
+                if euFlag == 1:
+                    syllableList[i] = syllableList[i].replace("!","&eu&")
+                elif euFlag == 2:
+                    syllableList[i] = syllableList[i].replace("!","&euv&")
+                syllableList[i] = syllableList[i].replace('!', 'eu')
+        
+        if syllableList[i].find('&&') != -1:
+            syllableList[i] = syllableList[i].replace('&&', '&')
+        
+        syllableList[i] = GeminateCorrection(syllableList[i],1)
+    
+    if flags.DEBUG:
+        for i in range(ln):
+            print(f'syllablifiedStack1 : {syllableList[i]}')
+        print(f'No of syllables : {ln}')
+
+    syllableCount = ln
+
+    if flags.writeFormat == 3:
+        flags.writeFormat = 0
+    
+    return 1
