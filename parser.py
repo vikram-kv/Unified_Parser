@@ -5,7 +5,7 @@ from ply.yacc import yacc
 from helpers import *
 
 # tokens identified by the lexer
-tokens = ('space', 'fullvowel_a', 'fullvowel_b', 'kaki_a', 'kaki_b', 'conjsyll2_a', 'conjsyll2_b', 'conjsyll2_c'
+tokens = ('space', 'fullvowel_a', 'fullvowel_b', 'kaki_a', 'kaki_b', 'kaki_c', 'conjsyll2_a', 'conjsyll2_b', 'conjsyll2_c'
 'conjsyll1', 'nukchan_a','nukchan_b', 'yarule', 'consonant', 'vowel', 'halant', 'matra')
 
 # lexical analyzer part
@@ -24,6 +24,21 @@ t_vowel = r'(&)*(a|aa|i|ii|u|uu|rq|ee|ei|o|ou|ax|a&mq|a&q|a&hq|aa&mq|aa&q|aa&hq|
 def t_conjsyll2_c(t):
     r'(eu)'
     t.value = 'eu&#'
+    return t
+
+def t_kaki_c(t):
+    r'(\&)*(k|kh|lx|rx|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|r|l|w|sh|sx|zh|y|s|h|f|dxq|z|kq|khq|gq|dxhq)((&)(lx|k|kh|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|ex|rx|f|dxq|z|kq|khq|gq|dxhq))*'
+    s = t.value
+    ans = ''
+    i = 1
+    if s[0] == '&':
+        ans += '&'
+    l = s.split('&')
+    for pch in l:
+        ans += f'{pch}&av&#&&'
+        i += 1
+    ans = ans[:(len(ans) - 7)]
+    t.value = ans
     return t
 
 # parser part
@@ -65,6 +80,7 @@ def p_syltoken(p):
              | fullvowel_b
              | kaki_a
              | kaki_b
+             | kaki_c
              | conjsyll2_a
              | conjsyll2_b
              | conjsyll2_c

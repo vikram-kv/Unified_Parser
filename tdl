@@ -7,3 +7,5 @@ using a list, map and a loop to do the corrections instead
 
 v) handle file operation exceptions everywhere
 
+vi) reorder lexer rules if necessary (will likely be needed !!!!! )
+
