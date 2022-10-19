@@ -3,12 +3,6 @@
 # global CONSTANTs for languages. Uses the same values as the enum at 
 # lines 11-13 of unified.y
 
-
-from curses import flash
-from dataclasses import replace
-import re
-from sys import flags
-
 class FLAGS:
     DEBUG = 0
     parseLevel = 0
@@ -1034,4 +1028,95 @@ def SplitSyllables(input : str) -> int:
     if flags.writeFormat == 3:
         flags.writeFormat = 0
     
+    return 1
+
+
+# replacement for function in lines 1164 - 1275. //make to write format
+def WritetoFiles() -> int:
+
+    global flags, syllableCount, syllableList
+
+    if flags.DEBUG:
+        for i in range(0,syllableCount):
+            print(f'syllablifiedStackfinal : {syllableList[i]}')
+    
+    validSyllable = 0
+    for i in range(0,syllableCount):
+        if syllableList[i] != '':
+            validSyllable += 1
+    
+    if flags.DEBUG:
+        print(f'a correction {syllableList[0]}')
+    
+    outputText = ''
+
+    # //phone
+    if flags.writeFormat == 0:
+        syllablesPrint = 0
+        for i in range(syllableCount):
+            outputText += '(( '
+
+            l = syllableList[i].split('&')
+            for pch in l:
+                if pch == '':
+                    break
+                if flags.DEBUG:
+                    print(f'syl  output{pch} {outputText}')
+                j = 1
+                outputText += f'"{pch}" '
+            if j != 0:
+                if flags.syllTagFlag != 0:
+                    if syllablesPrint == 0:
+                        outputText += '_beg'
+                    elif syllablesPrint == validSyllable - 1:
+                        outputText += '_end'
+                    else:
+                        outputText += '_mid'
+                    syllablesPrint += 1
+                outputText += ') 0) '
+            else:
+                outputText = outputText[:(len(outputText) - 3)]
+            j = 0
+    
+        outputText = outputText.replace('v', '')
+        outputText = outputText.replace('"eu"', '')
+        outputText = outputText.replace('!', '')
+    
+    # //syllable
+    elif flags.writeFormat == 1:
+        syllablesPrint = 0
+        for i in range(syllableCount):
+            syllableList[i] = syllableList[i].replace('euv', 'eu')
+            syllableList[i] = SyllableReverseCorrection(syllableList[i], flags.LangSpecificCorrectionFlag)
+            if flags.DEBUG:
+                print(f'{syllableList[i]}')
+            outputText += '(( "'
+            l = syllableList[i].split('&')
+            for pch in l:
+                if flags.DEBUG:
+                    print(f'syl {pch}')
+                j = 1
+                if CheckSymbol(pch) != 0:
+                    outputText += GetUTF(pch)
+                    if pch == 'av' and flags.DEBUG:
+                        print('av found')
+            if j != 0:
+                if flags.syllTagFlag != 0:
+                    if syllablesPrint == 0:
+                        outputText += '_beg'
+                    elif syllablesPrint == validSyllable - 1:
+                        outputText += '_end'
+                    else:
+                        outputText += '_mid'
+                    syllablesPrint += 1
+                outputText += '" ) 0) '
+            else:
+                outputText = outputText[:(len(outputText) - 4)]
+            j = 0
+    
+    outputText = outputText.replace('#', '')
+    if flags.DEBUG:
+        print(f'Print text : {outputText}')
+    
+    WriteFile(outputText)
     return 1

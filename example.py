@@ -25,7 +25,7 @@ from ply.yacc import yacc
 # --- Tokenizer
 
 # All tokens must be named in advance.
-tokens = ( 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN',
+tokens = ( 'PLuS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN',
            'NAME', 'NUMBER' )
 
 # Ignored characters
@@ -34,7 +34,7 @@ t_ignore = ' \t'
 cntr = 0
 
 # Token matching rules are written as regexs
-t_PLUS = r'\+'
+t_PLuS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
 t_DIVIDE = r'/'
@@ -55,9 +55,6 @@ def t_NUMBER(t):
 def t_error(t):
     print(f'Illegal character {t.value[0]!r}')
     t.lexer.skip(1)
-
-# Build the lexer object
-lexer = lex()
     
 # --- Parser
 
@@ -65,7 +62,7 @@ lexer = lex()
 # specified in the docstring.
 def p_expression(p):
     '''
-    expression : term PLUS term
+    expression : term PLuS term
                | term MINUS term
     '''
     # p is a sequence that represents rule contents.
@@ -99,6 +96,7 @@ def p_factor_number(p):
     factor : NUMBER
     '''
     p[0] = ('number', p[1])
+    print(type(p[1]))
 
 def p_factor_name(p):
     '''
@@ -108,7 +106,7 @@ def p_factor_name(p):
 
 def p_factor_unary(p):
     '''
-    factor : PLUS factor
+    factor : PLuS factor
            | MINUS factor
     '''
     p[0] = ('unary', p[1], p[2])
@@ -123,10 +121,11 @@ def p_error(p):
     print(f'Syntax error at {p.value!r}')
 
 # Build the parser
+lexer = lex()
 parser = yacc()
 
 # Parse an expression
-ast = parser.parse('2 * 345 + 4 * (अabc - 1)')
+ast = parser.parse('2 * 345 $ 4 * (अabc - 1)')
 
 print(ast)
 print(f'\t\t\t\n\n\n\n{cntr}')
