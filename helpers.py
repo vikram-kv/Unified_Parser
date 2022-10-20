@@ -1,81 +1,5 @@
+import globals
 # contains helper functions used in parser.py
-
-# global CONSTANTs for languages. Uses the same values as the enum at 
-# lines 11-13 of unified.y
-
-class FLAGS:
-    DEBUG = False
-    parseLevel = 0
-    pruiningFlag = 0
-    syllTagFlag = 0
-    fliteHTSFlag = 0
-    doubleParseSyl = 0
-    directParseFlag = 0
-    LangSpecificCorrectionFlag = 1
-    writeFormat = 0
-
-class WORDS:
-    wordCopy = ""
-    syllabifiedWord = ""
-    phonifiedWord = ""
-    unicodeWord = ""
-    syllabifiedWordOut = ""
-    outputText = ""
-
-class STRINGS:
-    bi = 0
-    leftStr = ['' for _ in range(1100)]
-    rightStr = ['' for _ in range(1100)]
-    def refresh(self):
-        self.leftStr = ['' for _ in range(1100)]
-        self.rightStr = ['' for _ in range(1100)]
-        self.bi = 0
-
-flags = FLAGS()
-words = WORDS()
-combvars = STRINGS()
-
-MALAYALAM = 1
-TAMIL = 2
-TELUGU = 3
-KANNADA = 4
-HINDI = 5
-BENGALI = 6
-GUJARATHI = 7
-ODIYA = 8
-ENGLISH = 9
-
-langId = 0
-isSouth = False
-syllableCount = 0
-
-# files and paths
-rootPath = "./"
-commonFile = "common"
-outputFile = ""
-outputPruneFile = "rag_pho"
-
-
-# mapping from utf8 language chars to the phoneme
-# implemented as list of lists [rows ~ 128, cols - 2]
-# mimics the construction in unified.y but may be replaced with a dictionary
-symbolTable = [['' for _ in range(2)] for _ in range(128)]
-ROW = 128
-COL = 2
-syllableList = []
-
-VOWELSSIZE=18
-CONSONANTSSIZE=25
-SEMIVOWELSSIZE=13
-
-VOWELS = ["a","e","i","o","u","aa","mq","aa","ii", "uu","rq","au","ee","ei","ou","oo","ax","ai"]
-CONSONANTS = ["k","kh","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh","n","p","ph","b","bh","m"]
-SEMIVOWELS = ["y","r","l","w","sh","sx","zh","s","h","lx","rx","f","dxq"]
-
-
-# variable to indicate current language being parsed.
-currLang = ENGLISH
-
 
 # function - RemoveUnwanted() - referenced in lines 63 - 109 of unified.y
 def RemoveUnwanted(input : str) -> str:
@@ -105,11 +29,11 @@ def RemoveUnwanted(input : str) -> str:
 # gives the filename according to language and type
 def GetFile(LangId : int, type : int) -> str:
 
-    fileName = rootPath
+    fileName = globals.rootPath
 
     # return common file that contains the CPS mapping
     if type == 0:
-        fileName += commonFile
+        fileName += globals.commonFile
         return fileName
     
     elif type == 1:
@@ -135,32 +59,31 @@ def GetFile(LangId : int, type : int) -> str:
 
 # function to replace SetlangId in lines 62-80 of unified.y
 def SetlangId(fl : str):
-    global langId, isSouth 
     id = ord(fl)
     if(id>=3328 and id<=3455):
-        currLang = MALAYALAM; #malayalam
+        globals.currLang = globals.MALAYALAM; #malayalam
     elif(id>=2944 and id<=3055):
-        currLang = TAMIL; #tamil
+        globals.currLang = globals.TAMIL; #tamil
     elif(id>=3202 and id<=3311):
-        currLang = KANNADA; #KANNADA
+        globals.currLang = globals.KANNADA; #KANNADA
     elif(id>=3072 and id<=3198):
-        currLang = TELUGU; #telugu
+        globals.currLang = globals.TELUGU; #telugu
     elif(id>=2304 and id<=2431):
-        currLang = HINDI; #hindi
+        globals.currLang = globals.HINDI; #hindi
     elif(id>=2432 and id<=2559):
-        currLang = BENGALI; #BENGALI
+        globals.currLang = globals.BENGALI; #BENGALI
     elif(id>=2688 and id<=2815):
-        currLang = GUJARATHI; #gujarathi
+        globals.currLang = globals.GUJARATHI; #gujarathi
     elif(id>=2816 and id<=2943):
-        currLang = ODIYA; #odia
+        globals.currLang = globals.ODIYA; #odia
     elif(id>=64 and id<=123):
-        currLang = ENGLISH; #english
+        globals.currLang = globals.ENGLISH; #english
 
-    langId = currLang
+    globals.langId = globals.currLang
 
-    if(langId < 5):
-        isSouth = 1
-    if(langId == 0):
+    if(globals.langId < 5):
+        globals.isSouth = 1
+    if(globals.langId == 0):
         print(f"UNKNOWN LANGUAGE - id = {fl}")
         exit(-1)
     return 1
@@ -168,8 +91,6 @@ def SetlangId(fl : str):
 
 # replacement for function in lins 158 - 213. Sets the lanuage features
 def SetlanguageFeat(input : str) -> int:
-
-    global symbolTable, langId
 
     # open common file
     with open(GetFile(0,0), 'r') as infile:
@@ -187,12 +108,11 @@ def SetlanguageFeat(input : str) -> int:
             break
     
     SetlangId(firstLet) # set global langId
-
     for i in range(len(lines)):
         l = lines[i].strip().split('\t')
         assert(len(l) == 10)
-        symbolTable[i][1] = l[1]
-        symbolTable[i][0] = l[1 + langId]
+        globals.symbolTable[i][1] = l[1]
+        globals.symbolTable[i][0] = l[1 + globals.langId]
 
     return 1
 
@@ -200,36 +120,33 @@ def SetlanguageFeat(input : str) -> int:
 # replacement for function in lines 52 - 59. Check if symbol is in symbolTable
 def CheckSymbol(input : str) -> int:
     i = 0
-    for i in range(ROW):
-        if (symbolTable[i][0] == input):
+    for i in range(globals.ROW):
+        if (globals.symbolTable[i][1] == input):
             return 1
     return 0
 
 
 # replacement for function in lines 249 - 276. Convert utf-8 to cps symbols
 def ConvertToSymbols(input : str) -> str:
-    global flags, words, symbolTable
 
     output = ""
     str1 = input
 
-    words.syllabifiedWord = "&"
-
+    globals.words.syllabifiedWord = "&"
     for j in range(len(str1)):
         if (ord(str1[j]) < 8204):
-            words.syllabifiedWord += "&" + symbolTable[ord(str[1])%128][1]
+            globals.words.syllabifiedWord += "&" + globals.symbolTable[ord(str1[j])%128][1]
 
-    output = words.syllabifiedWord
+    output = globals.words.syllabifiedWord
     return output
 
 
 # function in lines 1278 - 1299. write to wordpronunciation file
 def WriteFile(text : str):
-    global flags, outputFile
 
-    output = open(outputFile, 'w')
+    output = open(globals.outputFile, 'w')
 
-    if (flags.fliteHTSFlag):
+    if (globals.flags.fliteHTSFlag):
         print(f"phones : {text}")
         output.write(text + '\n')
         output.close()
@@ -240,14 +157,13 @@ def WriteFile(text : str):
     output.write("))\n")
 
     output.close()
-    if (flags.writeFormat == 0 and flags.pruiningFlag == 1):
+    if (globals.flags.writeFormat == 0 and globals.flags.pruiningFlag == 1):
         WritePruneFile(text)
 
 
 # function in lines 1302-1313. output for pruning
 def WritePruneFile(text : str):
-    global outputPruneFile
-    output = open(outputPruneFile, 'w')
+    output = open(globals.outputPruneFile, 'w')
     text = text.replace("(", "")
     text = text.replace(")", "")
     text = text.replace("0", "")
@@ -291,7 +207,6 @@ def CheckSingleVowel(input : str, q : int) -> int:
 
 # function in lines 616 - 629. get the type of phone in the position
 def GetPhoneType(input : str, pos : int) -> int:
-    global flags
     phone = input
     count = 1
     i = 0
@@ -302,7 +217,7 @@ def GetPhoneType(input : str, pos : int) -> int:
         if (count >= pos):
             break
     
-    if (flags.DEBUG):
+    if (globals.flags.DEBUG):
         print(f"str : {pch} {GetType(pch)}\n")
 
     return GetType(pch)
@@ -310,14 +225,14 @@ def GetPhoneType(input : str, pos : int) -> int:
 # function in lines 631 - 637. get the type of given input
 def GetType(input : str):
 
-    for i in range(VOWELSSIZE):
-        if VOWELS[i] == input:
+    for i in range(globals.VOWELSSIZE):
+        if globals.VOWELS[i] == input:
             return 1
-    for i in range(CONSONANTSSIZE):
-        if CONSONANTS[i] == input:
+    for i in range(globals.CONSONANTSSIZE):
+        if globals.CONSONANTS[i] == input:
             return 2
-    for i in range(SEMIVOWELSSIZE):
-        if SEMIVOWELS[i] == input:
+    for i in range(globals.SEMIVOWELSSIZE):
+        if globals.SEMIVOWELS[i] == input:
             return 3
     
     return 0
@@ -333,11 +248,10 @@ def CheckChillu(input : str) -> int:
 
 # function in lines 650 - 660. get UTF-8 from CPS
 def GetUTF(input : str) -> str :
-
-    global symbolTable
-    for i in range(ROW):
-        if (input == symbolTable[i][1]):
-            return symbolTable[i][0]
+    for i in range(globals.ROW):
+        if (input == globals.symbolTable[i][1]):
+            
+            return globals.symbolTable[i][0]
     
     return 0
 
@@ -371,18 +285,18 @@ def MiddleVowel(phone : str) -> str:
     c1 = ''
     c2 = ''
     phonecopy = phone
-    for i in range(CONSONANTSSIZE):
-        for j in range(VOWELSSIZE):
-            c1 = f'&{CONSONANTS[i]}&{VOWELS[j]}&'
-            c2 = f'&{CONSONANTS[i]}&av&{VOWELS[j]}&'
+    for i in range(globals.CONSONANTSSIZE):
+        for j in range(globals.VOWELSSIZE):
+            c1 = f'&{globals.CONSONANTS[i]}&{globals.VOWELS[j]}&'
+            c2 = f'&{globals.CONSONANTS[i]}&av&{globals.VOWELS[j]}&'
 
             phonecopy = phonecopy.replace(c1, '@')
             phonecopy = phonecopy.replace('@', c2)
 
-    for i in range(SEMIVOWELSSIZE):
-        for j in range(VOWELSSIZE):
-            c1 = f'&{SEMIVOWELS[i]}&{VOWELS[j]}&'
-            c2 = f'&{SEMIVOWELS[i]}&av&{VOWELS[j]}&'
+    for i in range(globals.SEMIVOWELSSIZE):
+        for j in range(globals.VOWELSSIZE):
+            c1 = f'&{globals.SEMIVOWELS[i]}&{globals.VOWELS[j]}&'
+            c2 = f'&{globals.SEMIVOWELS[i]}&av&{globals.VOWELS[j]}&'
 
             phonecopy = phonecopy.replace(c1, '@')
             phonecopy = phonecopy.replace('@', c2)
@@ -429,6 +343,7 @@ def SchwaDoubleConsonent(phone : str) -> str:
     "ee&","ei&","ou&","oo&","ax&","ai&","ev&","uv&",
     "a&","e&","i&","o&","u&"]
 
+    phonecopy = phone
     for i in range(0,39):
         for j in range(0,39):
             for k in range(0,42):
@@ -447,7 +362,6 @@ def SchwaDoubleConsonent(phone : str) -> str:
 # replacement for function in lines 498 - 585. //halant specific correction for aryan langs
 def SchwaSpecificCorrection(phone : str) -> str:
 
-    global flags
     schwaList = ["k","kh","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh",
     "nx","t","th","d","dh","n","p","ph","b","bh","m","y",
     "r","l","s","w","sh","sx","zh","h","lx","rx","f","dxq"]
@@ -458,12 +372,12 @@ def SchwaSpecificCorrection(phone : str) -> str:
     "ee&","ei&","ou&","oo&","ax&","ai&","ev&","uv&",
     "a&","e&","i&","o&","u&"]
 
-    if (flags.DEBUG):
+    if (globals.flags.DEBUG):
         print(f'{len(phone)}\n')
     
     phonecopy = phone + '!'
 
-    if (flags.DEBUG):
+    if (globals.flags.DEBUG):
         print(f'phone cur - {phonecopy}\n')
     
     # // for end correction &av&t&aav&. //dont want av
@@ -482,7 +396,7 @@ def SchwaSpecificCorrection(phone : str) -> str:
         phonecopy = phonecopy.replace(c1, '@')
         phonecopy = phonecopy.replace('@', c2)
 
-    if(flags.DEBUG):
+    if(globals.flags.DEBUG):
         print(f"inside schwa{phonecopy}\n")
     
 
@@ -498,8 +412,8 @@ def SchwaSpecificCorrection(phone : str) -> str:
 
     phonecopy = phonecopy.replace("$","")
 
-    #//&q&w&eu&
-    for i in range(0,39):
+    #//&q&w&eu& - CORRECTED TO 38 - CHECK
+    for i in range(0,38):
         c1 = f'&q&{schwaList[i]}&euv&'
         c2 = f'&q&{schwaList[i]}&av&'
         phonecopy = phonecopy.replace(c1, '@')
@@ -593,20 +507,20 @@ def Syllabilfy(phone : str) -> str:
 # REMOVED EXIT(1) ON ENGLISH. WAS USELESS
 def CheckDictionary(input : str) -> int:
 
-    global langId, flags
-    fileName = GetFile(langId, 1)
-    if (flags.DEBUG):
+    fileName = GetFile(globals.langId, 1)
+    if (globals.flags.DEBUG):
         print(f'dict : {fileName}')
     try:
         with open(fileName, 'r') as output:
             cnts = output.readlines()
     except:
-        print(f'Dict not found')
-        if(langId == ENGLISH):
+        if globals.flags.DEBUG:
+            print(f'Dict not found')
+        if(globals.langId == globals.ENGLISH):
             exit(1)
         return 0
 
-    if (langId == ENGLISH):
+    if (globals.langId == globals.ENGLISH):
         input1 = ''
         for c in input:
             if ord(c) < 97:
@@ -617,16 +531,16 @@ def CheckDictionary(input : str) -> int:
     for l in cnts:
         l = l.strip().split('\t')
         assert(len(l) == 3)
-        if flags.DEBUG:
+        if globals.flags.DEBUG:
             print(f"word : {l[0]}\n")
         if input == l[0]:
-            if flags.DEBUG:
+            if globals.flags.DEBUG:
                 print(f"match found")
                 print(f'Syllables : {l[1]}')
                 print(f'monophones : {l[2]}')
-            if flags.writeFormat == 1:
+            if globals.flags.writeFormat == 1:
                 WriteFile(l[1])
-            if flags.writeFormat == 0:
+            if globals.flags.writeFormat == 0:
                 WriteFile(l[2])
             return 1
 
@@ -660,15 +574,14 @@ def CountChars(s : str, c : str) -> int:
 
 # replacement for function in lines 719 - 744.
 def GenerateAllCombinations(j : int, s : str, c : list, isRight : int):
-    global combvars
     t = ''
     if (c[j][0][0] == '#'):
         if isRight == 1:
-            combvars.rightStr[combvars.bi] = s + '&'
-            combvars.bi += 1
+            globals.combvars.rightStr[globals.combvars.bi] = s + '&'
+            globals.combvars.bi += 1
         else:
-            combvars.leftStr[combvars.bi] = s + '&'
-            combvars.bi += 1
+            globals.combvars.leftStr[globals.combvars.bi] = s + '&'
+            globals.combvars.bi += 1
     else:
         i = 0
         while (c[j][i][0] != '#'):
@@ -682,7 +595,6 @@ def GenerateMatrix(combMatrix : list, regex : str):
     row = 0
     col = 0
     item = 0
-    global flags
     for i in range(0, len(regex)):
         if regex[i] == '&':
             combMatrix[row][col+1] = '#'
@@ -697,7 +609,7 @@ def GenerateMatrix(combMatrix : list, regex : str):
         else:
             combMatrix[row][col] = combMatrix[row][col][:item] + regex[i] + combMatrix[row][col][(item+1):]
             item += 1
-        if flags.DEBUG:
+        if globals.flags.DEBUG:
             print(f'{row} {col} {combMatrix[row][col]}')
 
     combMatrix[row][col+1] = '#'
@@ -705,41 +617,39 @@ def GenerateMatrix(combMatrix : list, regex : str):
 
 # replacement for function in lines 770 - 799.
 def CombinationCorrection(phone : str, left : str, right : str, isReverse : int) -> str:
-    global combvars, flags
     leftComb = [['' for _ in range(256)] for _ in range(256)]
     rightComb = [['' for _ in range(256)] for _ in range(256)]
     GenerateMatrix(leftComb, left)
     GenerateMatrix(rightComb, right)
 
-    combvars.bi = 0
+    globals.combvars.bi = 0
     GenerateAllCombinations(0, '', leftComb, 0)
-    combvars.bi = 0
+    globals.combvars.bi = 0
     GenerateAllCombinations(0, '', rightComb, 1)
 
     i = 0
     phonecopy = phone
-    while combvars.leftStr[i] != '':
+    while globals.combvars.leftStr[i] != '':
         if isReverse == 1:
-            phonecopy = phonecopy.replace(combvars.rightStr[i], "!")
-            phonecopy = phonecopy.replace("!", combvars.leftStr[i])
+            phonecopy = phonecopy.replace(globals.combvars.rightStr[i], "!")
+            phonecopy = phonecopy.replace("!", globals.combvars.leftStr[i])
         else:
-            phonecopy = phonecopy.replace(combvars.leftStr[i], "!")
-            phonecopy = phonecopy.replace("!", combvars.rightStr[i])
+            phonecopy = phonecopy.replace(globals.combvars.leftStr[i], "!")
+            phonecopy = phonecopy.replace("!", globals.combvars.rightStr[i])
 
-        if flags.DEBUG:
-            print(f'{combvars.leftStr[i]} {combvars.rightStr[i]}')
+        if globals.flags.DEBUG:
+            print(f'{globals.combvars.leftStr[i]} {globals.combvars.rightStr[i]}')
         
         i += 1
     
-    combvars.refresh()
+    globals.combvars.refresh()
     return phonecopy
 
 # replacement for function in lines 825 - 930. //Language specific corrections
 def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
-    global flags, isSouth, langId
     phonecopy = phone
 
-    if isSouth:
+    if globals.isSouth:
         phonecopy = phonecopy.replace("&ei&","&ai&")
         phonecopy = phonecopy.replace("&eiv&","&aiv&")
     else:
@@ -789,7 +699,7 @@ def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
     if langSpecFlag == 0:
         return phonecopy
     
-    fileName = GetFile(langId, 2)
+    fileName = GetFile(globals.langId, 2)
     with open(fileName, 'r') as output:
         cnts = output.readlines()
 
@@ -797,7 +707,7 @@ def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
     right = ''
     phonecopy = '^' + phonecopy + '$'
 
-    if (flags.DEBUG):
+    if (globals.flags.DEBUG):
         print(f'phone : {phonecopy}')
     
     for l in cnts:
@@ -813,7 +723,7 @@ def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
             a1 = left[1:-1]
             a2 = right[1:-1]
             phonecopy = CombinationCorrection(phonecopy, a1, a2, 0)
-            if flags.DEBUG:
+            if globals.flags.DEBUG:
                 print(f'{a1}\t{a2}')
         elif left.find('@') != -1:
             phonecopy = PositionCorrection(phonecopy, left, right, 0)
@@ -832,15 +742,11 @@ def LangSpecificCorrection(phone : str, langSpecFlag : int) -> str:
     return phonecopy[:(count+1)]
 
 
-
-
-
 # Replacement for function in lines 934 - 991. //Reverse syllable correction for syllable parsing
 def SyllableReverseCorrection(phone : str, langSpecFlag : int) -> str:
-    global flags, isSouth, langId
     phonecopy = phone
 
-    if isSouth:
+    if globals.isSouth:
         phonecopy = phonecopy.replace("&ai&","&ei&")
         phonecopy = phonecopy.replace("&aiv&","&eiv&")
     else:
@@ -850,7 +756,7 @@ def SyllableReverseCorrection(phone : str, langSpecFlag : int) -> str:
     if langSpecFlag == 0:
         return phonecopy
 
-    fileName = GetFile(langId, 2)
+    fileName = GetFile(globals.langId, 2)
     with open(fileName, 'r') as output:
         cnts = output.readlines()
 
@@ -859,7 +765,7 @@ def SyllableReverseCorrection(phone : str, langSpecFlag : int) -> str:
     # //update head and tail in phone
     phonecopy = '^' + phonecopy + '$'
 
-    if (flags.DEBUG):
+    if globals.flags.DEBUG:
         print(f'before phone : {phonecopy}')
     
     for l in cnts:
@@ -875,7 +781,7 @@ def SyllableReverseCorrection(phone : str, langSpecFlag : int) -> str:
             a1 = left[1:-1]
             a2 = right[1:-1]
             phonecopy = CombinationCorrection(phonecopy, a1, a2, 1)
-            if flags.DEBUG:
+            if globals.flags.DEBUG:
                 print(f'{a1}\t{a2}')
         elif left.find('@') != -1:
             phonecopy = PositionCorrection(phonecopy, left, right, 1)
@@ -887,7 +793,7 @@ def SyllableReverseCorrection(phone : str, langSpecFlag : int) -> str:
     phonecopy = phonecopy.replace('^', '')
     phonecopy = phonecopy.replace('$', '')
     # //end correction
-    if (flags.DEBUG):
+    if (globals.flags.DEBUG):
         print(f'after phone : {phonecopy}')
     return phonecopy
 
@@ -900,11 +806,9 @@ def LangSyllableCorrection(input : str) -> int:
 
 # replacement for function in lines 1000 - 1160. //split into syllable array
 def SplitSyllables(input : str) -> int:
-
-    global flags, syllableList, syllableCount
     incopy = input
 
-    if flags.writeFormat == 2:
+    if globals.flags.writeFormat == 2:
         i = 0
         j = 0
         fullList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh","n","p","ph","b","bh","m","y","r","l","w","sh","sx","zh","y","s","h","f","dxq"]
@@ -921,118 +825,118 @@ def SplitSyllables(input : str) -> int:
 
 
     pch = incopy.split('#')
-    syllableList = []
+    globals.syllableList = []
     for c in pch:
         if c != '&':
-            syllableList.append(c)
+            globals.syllableList.append(c)
     
     # ln -> len
-    ln = len(syllableList)
+    ln = len(globals.syllableList)
 
-    if flags.DEBUG:
-        for i in range(len):
-            print(f"initStack : {syllableList[i]}\n")
+    if globals.flags.DEBUG:
+        for i in range(ln):
+            print(f"initStack : {globals.syllableList[i]}\n")
     
     # //south specific av addition
-    if CheckVowel(syllableList[ln-1],1,0) == 0 and CheckChillu(syllableList[ln-1]) == 0:
-        if isSouth:
-            syllableList[ln-1] += '&av&'
+    if CheckVowel(globals.syllableList[ln-1],1,0) == 0 and CheckChillu(globals.syllableList[ln-1]) == 0:
+        if globals.isSouth:
+            globals.syllableList[ln-1] += '&av&'
         else:
-            syllableList[ln-1] += '&euv&'
+            globals.syllableList[ln-1] += '&euv&'
 
     # //round 2 correction
 
-    if flags.writeFormat == 2:
-        syllableCount = ln
-        flags.writeFormat = 1
+    if globals.flags.writeFormat == 2:
+        globals.syllableCount = ln
+        globals.flags.writeFormat = 1
         return 1
 
     euFlag = 1
     if ln > 1:
         for i in range(ln-1,-1,-1):
-            if LangSyllableCorrection(syllableList[i]) == 1:
-                syllableList[i-1] += syllableList[i]
-                syllableList[i] = ''
+            if LangSyllableCorrection(globals.syllableList[i]) == 1:
+                globals.syllableList[i-1] += globals.syllableList[i]
+                globals.syllableList[i] = ''
 
-            if syllableList[i].find("&eu&") != -1:
-                syllableList[i] = syllableList[i].replace("&eu&", "!")
+            if globals.syllableList[i].find("&eu&") != -1:
+                globals.syllableList[i] = globals.syllableList[i].replace("&eu&", "!")
                 euFlag = 1
 
-            if syllableList[i].find("&euv&") != -1:
-                syllableList[i] = syllableList[i].replace("&euv&", "!")
+            if globals.syllableList[i].find("&euv&") != -1:
+                globals.syllableList[i] = globals.syllableList[i].replace("&euv&", "!")
                 euFlag = 2
             
-            if CheckVowel(syllableList[i],0,1) == 0:
+            if CheckVowel(globals.syllableList[i],0,1) == 0:
                 if i-1 >= 0:
-                    syllableList[i-1] += syllableList[i]
-                    syllableList[i] = ''
+                    globals.syllableList[i-1] += globals.syllableList[i]
+                    globals.syllableList[i] = ''
                 else:
-                    syllableList[i] += syllableList[i+1]
-                    syllableList[i+1] = ''
+                    globals.syllableList[i] += globals.syllableList[i+1]
+                    globals.syllableList[i+1] = ''
             
             if i-1 > 0:
                 if euFlag == 1:
-                    syllableList[i-1] = syllableList[i-1].replace("!","&eu&")
+                    globals.syllableList[i-1] = globals.syllableList[i-1].replace("!","&eu&")
                 elif euFlag == 2:
-                    syllableList[i-1] = syllableList[i-1].replace("!","&euv&")
-                syllableList[i-1] = syllableList[i-1].replace("&&","&")
+                    globals.syllableList[i-1] = globals.syllableList[i-1].replace("!","&euv&")
+                globals.syllableList[i-1] = globals.syllableList[i-1].replace("&&","&")
             
             if euFlag == 1:
-                syllableList[i] = syllableList[i].replace("!","&eu&")
+                globals.syllableList[i] = globals.syllableList[i].replace("!","&eu&")
             elif euFlag == 2:
-                syllableList[i] = syllableList[i].replace("!","&euv&")
+                globals.syllableList[i] = globals.syllableList[i].replace("!","&euv&")
     else:
-        print(f" syll 0 {syllableList[0]}")
-        if (CheckVowel(syllableList[0],1,0) == 0 and flags.writeFormat != 3) or Checkeuv(syllableList[0]) == 1:
-            syllableList[0] += '&av'
+        print(f" syll 0 {globals.syllableList[0]}")
+        if (CheckVowel(globals.syllableList[0],1,0) == 0 and globals.flags.writeFormat != 3) or Checkeuv(globals.syllableList[0]) == 1:
+            globals.syllableList[0] += '&av'
 
-    if flags.DEBUG:
+    if globals.flags.DEBUG:
         for i in range(ln):
-            print(f'syllablifiedStack : {syllableList[i]}')
+            print(f'syllablifiedStack : {globals.syllableList[i]}')
 
     # //round 3 double syllable correction
     for i in range(ln):
 
         # //corrections
-        syllableList[i] = syllableList[i].replace('1','')
-        if flags.DEBUG:
-            print(f'LenStack : {len(syllableList[i])}')
+        globals.syllableList[i] = globals.syllableList[i].replace('1','')
+        if globals.flags.DEBUG:
+            print(f'LenStack : {len(globals.syllableList[i])}')
         
-        if len(syllableList[i]) > 0:
-            if syllableList[i].find("&eu&") != -1:
-                syllableList[i] = syllableList[i].replace("&eu&", "!")
+        if len(globals.syllableList[i]) > 0:
+            if globals.syllableList[i].find("&eu&") != -1:
+                globals.syllableList[i] = globals.syllableList[i].replace("&eu&", "!")
                 euFlag = 1
 
-            if syllableList[i].find("&euv&") != -1:
-                syllableList[i] = syllableList[i].replace("&euv&", "!")
+            if globals.syllableList[i].find("&euv&") != -1:
+                globals.syllableList[i] = globals.syllableList[i].replace("&euv&", "!")
                 euFlag = 2
             
-            if CheckVowel(syllableList[i],0,1) == 0 and flags.writeFormat != 3:
-                if flags.DEBUG:
-                    print(f'Stack : {syllableList[i]}')
-                syllableList[i] += '&av'
+            if CheckVowel(globals.syllableList[i],0,1) == 0 and globals.flags.writeFormat != 3:
+                if globals.flags.DEBUG:
+                    print(f'Stack : {globals.syllableList[i]}')
+                globals.syllableList[i] += '&av'
             
-            if syllableList[i].find('!') != -1:
+            if globals.syllableList[i].find('!') != -1:
                 if euFlag == 1:
-                    syllableList[i] = syllableList[i].replace("!","&eu&")
+                    globals.syllableList[i] = globals.syllableList[i].replace("!","&eu&")
                 elif euFlag == 2:
-                    syllableList[i] = syllableList[i].replace("!","&euv&")
-                syllableList[i] = syllableList[i].replace('!', 'eu')
+                    globals.syllableList[i] = globals.syllableList[i].replace("!","&euv&")
+                globals.syllableList[i] = globals.syllableList[i].replace('!', 'eu')
         
-        if syllableList[i].find('&&') != -1:
-            syllableList[i] = syllableList[i].replace('&&', '&')
+        if globals.syllableList[i].find('&&') != -1:
+            globals.syllableList[i] = globals.syllableList[i].replace('&&', '&')
         
-        syllableList[i] = GeminateCorrection(syllableList[i],1)
+        globals.syllableList[i] = GeminateCorrection(globals.syllableList[i],1)
     
-    if flags.DEBUG:
+    if globals.flags.DEBUG:
         for i in range(ln):
-            print(f'syllablifiedStack1 : {syllableList[i]}')
+            print(f'syllablifiedStack1 : {globals.syllableList[i]}')
         print(f'No of syllables : {ln}')
 
-    syllableCount = ln
+    globals.syllableCount = ln
 
-    if flags.writeFormat == 3:
-        flags.writeFormat = 0
+    if globals.flags.writeFormat == 3:
+        globals.flags.writeFormat = 0
     
     return 1
 
@@ -1040,89 +944,88 @@ def SplitSyllables(input : str) -> int:
 # replacement for function in lines 1164 - 1275. //make to write format
 def WritetoFiles() -> int:
 
-    global flags, syllableCount, syllableList
-
-    if flags.DEBUG:
-        for i in range(0,syllableCount):
-            print(f'syllablifiedStackfinal : {syllableList[i]}')
+    if globals.flags.DEBUG:
+        for i in range(0,globals.syllableCount):
+            print(f'syllablifiedStackfinal : {globals.syllableList[i]}')
     
     validSyllable = 0
-    for i in range(0,syllableCount):
-        if syllableList[i] != '':
+    for i in range(0,globals.syllableCount):
+        if globals.syllableList[i] != '':
             validSyllable += 1
     
-    if flags.DEBUG:
-        print(f'a correction {syllableList[0]}')
+    if globals.flags.DEBUG:
+        print(f'a correction {globals.syllableList[0]}')
     
-    outputText = ''
+    globals.words.outputText = ''
 
     # //phone
-    if flags.writeFormat == 0:
+    j = 0
+    if globals.flags.writeFormat == 0:
         syllablesPrint = 0
-        for i in range(syllableCount):
-            outputText += '(( '
-
-            l = syllableList[i].split('&')
+        for i in range(globals.syllableCount):
+            globals.words.outputText += '(( '
             for pch in l:
                 if pch == '':
-                    break
-                if flags.DEBUG:
-                    print(f'syl  output{pch} {outputText}')
+                    continue
+                if globals.flags.DEBUG:
+                    print(f'syl  output{pch} {globals.words.outputText}')
                 j = 1
-                outputText += f'"{pch}" '
+                globals.words.outputText += f'"{pch}" '
             if j != 0:
-                if flags.syllTagFlag != 0:
+                if globals.flags.syllTagFlag != 0:
                     if syllablesPrint == 0:
-                        outputText += '_beg'
+                        globals.words.outputText += '_beg'
                     elif syllablesPrint == validSyllable - 1:
-                        outputText += '_end'
+                        globals.words.outputText += '_end'
                     else:
-                        outputText += '_mid'
+                        globals.words.outputText += '_mid'
                     syllablesPrint += 1
-                outputText += ') 0) '
+                globals.words.outputText += ') 0) '
             else:
-                outputText = outputText[:(len(outputText) - 3)]
+                globals.words.outputText = globals.words.outputText[:(len(globals.outputText) - 3)]
             j = 0
     
-        outputText = outputText.replace('v', '')
-        outputText = outputText.replace('"eu"', '')
-        outputText = outputText.replace('!', '')
+        globals.words.outputText = globals.words.outputText.replace('v', '')
+        globals.words.outputText = globals.words.outputText.replace('"eu"', '')
+        globals.words.outputText = globals.words.outputText.replace('!', '')
     
     # //syllable
-    elif flags.writeFormat == 1:
+    elif globals.flags.writeFormat == 1:
         syllablesPrint = 0
-        for i in range(syllableCount):
-            syllableList[i] = syllableList[i].replace('euv', 'eu')
-            syllableList[i] = SyllableReverseCorrection(syllableList[i], flags.LangSpecificCorrectionFlag)
-            if flags.DEBUG:
-                print(f'{syllableList[i]}')
-            outputText += '(( "'
-            l = syllableList[i].split('&')
+        for i in range(globals.syllableCount):
+            globals.syllableList[i] = globals.syllableList[i].replace('euv', 'eu')
+            globals.syllableList[i] = SyllableReverseCorrection(globals.syllableList[i], globals.flags.LangSpecificCorrectionFlag)
+            if globals.flags.DEBUG:
+                print(f'{globals.syllableList[i]}')
+            globals.words.outputText += '(( "'
+            l = globals.syllableList[i].split('&')
             for pch in l:
-                if flags.DEBUG:
+                if pch == '':
+                    continue
+                if globals.flags.DEBUG:
                     print(f'syl {pch}')
                 j = 1
                 if CheckSymbol(pch) != 0:
-                    outputText += GetUTF(pch)
-                    if pch == 'av' and flags.DEBUG:
+                    globals.words.outputText += GetUTF(pch)
+                    if pch == 'av' and globals.flags.DEBUG:
                         print('av found')
             if j != 0:
-                if flags.syllTagFlag != 0:
+                if globals.flags.syllTagFlag != 0:
                     if syllablesPrint == 0:
-                        outputText += '_beg'
+                        globals.words.outputText += '_beg'
                     elif syllablesPrint == validSyllable - 1:
-                        outputText += '_end'
+                        globals.words.outputText += '_end'
                     else:
-                        outputText += '_mid'
+                        globals.words.outputText += '_mid'
                     syllablesPrint += 1
-                outputText += '" ) 0) '
+                globals.words.outputText += '" ) 0) '
             else:
-                outputText = outputText[:(len(outputText) - 4)]
+                globals.words.outputText = globals.words.outputText[:(len(globals.words.outputText) - 4)]
             j = 0
     
-    outputText = outputText.replace('#', '')
-    if flags.DEBUG:
-        print(f'Print text : {outputText}')
+    globals.words.outputText = globals.words.outputText.replace('#', '')
+    if globals.flags.DEBUG:
+        print(f'Print text : {globals.words.outputText}')
     
-    WriteFile(outputText)
+    WriteFile(globals.words.outputText)
     return 1

@@ -9,3 +9,4 @@ v) handle file operation exceptions everywhere
 
 vi) reorder lexer rules if necessary (will likely be needed !!!!! )
 
+vii) correction in SchwaSpecificCorrection() check
