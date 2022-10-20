@@ -124,7 +124,7 @@ def printHelp():
     print("Example: ./unified-parser 1 4 0 0 - Syllable parser with beg mid end")
 
 def main():
-    global flags, words, outputFile, langId
+    global flags, words, outputFile, langId, isSouth, words
     lexer = lex()
     parser = yacc()
 
@@ -132,7 +132,7 @@ def main():
     argv = sys.argv
 
     if argc <= 5:
-        print('READ HELP!!')
+        printHelp()
         exit(1)
     
     if argv[2] != '1':
@@ -204,6 +204,68 @@ def main():
     words.syllabifiedWordOut = CleanseWord(words.syllabifiedWordOut)
     if flags.DEBUG:
         print(f'Syllabified Word memCorr : {words.syllabifiedWordOut}')
+
+    if isSouth == 0:
+        count = 0
+        for i in len(words.syllabifiedWordOut):
+            if i != '&':
+                count += 1
+        splitPosition = 2
+        if GetPhoneType(words.syllabifiedWord, 1) == 1:
+            if count > 2:
+                tpe = GetPhoneType(words.syllabifiedWord, 2)
+                if tpe == 2:
+                    splitPosition = 1
+                elif tpe == 3:
+                    splitPosition = 3
+            else:
+                splitPosition = 1
+        count = 0
+        for i in range(len(words.syllabifiedWordOut)):
+            if words.syllabifiedWordOut == '&':
+                count += 1
+            if count > splitPosition:
+                count = i
+                break
+        start, end = words.syllabifiedWordOut, words.syllabifiedWordOut
+        end = end[count:]
+        start = start[:count]
+
+        if flags.DEBUG:
+            print(f'posi  {count} {start} {end}')
+        end = SchwaSpecificCorrection(end)
+        if flags.DEBUG:
+            print(f'prefinal : {words.syllabifiedWordOut}\n')
+        words.syllabifiedWordOut = start + end
+        if flags.DEBUG:
+            print(f'prefinal1 : {words.syllabifiedWordOut}')
+        words.syllabifiedWordOut = CleanseWord(words.syllabifiedWordOut)
+        if flags.DEBUG:
+            print(f'final : {words.syllabifiedWord}')
+        words.syllabifiedWordOut = SchwaDoubleConsonent(words.syllabifiedWordOut)
+        if flags.DEBUG:
+            print(f'final0 : {words.syllabifiedWordOut}')
+    
+    words.syllabifiedWordOut = GeminateCorrection(words.syllabifiedWordOut, 0)
+    if flags.DEBUG:
+        print(f'Syllabified Word gemCorr : {words.syllabifiedWordOut}')
+    
+    words.syllabifiedWordOut = MiddleVowel(words.syllabifiedWordOut)
+    if flags.DEBUG:
+        print(f'Syllabified Word gemCorr : {words.syllabifiedWordOut}')
+
+    words.syllabifiedWordOut = Syllabilfy(words.syllabifiedWordOut)
+    if flags.DEBUG:
+        print(f'Syllabified Word final : {words.syllabifiedWordOut}')
+    
+    SplitSyllables(words.syllabifiedWordOut)
+    if flags.DEBUG:
+        print('Splitted to Syllables')
+    
+    WritetoFiles()
+    if flags.DEBUG:
+        print(f'Files created {words.outputText}')
+
    
 
 if __name__ == '__main__':
