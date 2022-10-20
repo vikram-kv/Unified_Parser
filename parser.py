@@ -25,10 +25,8 @@ def t_kaki_c(t):
             continue
         ans += f'{pch}&av&#&&'
         i += 1
-    print(f'doubt - {ans}')
     ans = ans[:(len(ans) - 7)]
     t.value = ans
-    print(f'doubt - {t.value}')
     return t
 
 def t_conjsyll2_c(t):
@@ -143,7 +141,7 @@ def main():
 
     argc = len(sys.argv)
     argv = sys.argv
-    globals.flags.DEBUG = True
+    globals.flags.DEBUG = False
     if argc <= 5:
         printHelp()
         exit(1)
@@ -278,6 +276,7 @@ def main():
     WritetoFiles()
     if globals.flags.DEBUG:
         print(f'Files created {globals.words.outputText}')
+    print(globals.words.outputText)
 
 if __name__ == '__main__':
     main()
