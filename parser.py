@@ -21,10 +21,14 @@ def t_kaki_c(t):
         ans += '&'
     l = s.split('&')
     for pch in l:
+        if pch == '':
+            continue
         ans += f'{pch}&av&#&&'
         i += 1
+    print(f'doubt - {ans}')
     ans = ans[:(len(ans) - 7)]
     t.value = ans
+    print(f'doubt - {t.value}')
     return t
 
 def t_conjsyll2_c(t):
@@ -81,23 +85,31 @@ def p_words_wordsandsyltoken(p):
 
 def p_syltoken(p):
     '''
-    syltoken : fullvowel_a
-             | fullvowel_b
-             | kaki_a
-             | kaki_b
-             | kaki_c
-             | conjsyll2_a
-             | conjsyll2_b
+    syltoken : fullvowel_b
+             | fullvowel_a
              | conjsyll2_c
+             | conjsyll2_b
+             | conjsyll2_a
              | conjsyll1 
-             | nukchan_a
              | nukchan_b
+             | nukchan_a
              | yarule
              | consonant
              | vowel
              | halant
              | matra
     '''
+    p[0] = p[1]
+
+def p_syltoken1(p):
+    '''
+    syltoken :
+             | kaki_c
+             | kaki_a
+             | kaki_b
+    '''
+    if globals.flags.DEBUG:
+        print(f'kaki : {p[1]}')
     p[0] = p[1]
 
 def p_error(p):
