@@ -59,7 +59,7 @@ outputPruneFile = "rag_pho"
 # mapping from utf8 language chars to the phoneme
 # implemented as list of lists [rows ~ 128, cols - 2]
 # mimics the construction in unified.y but may be replaced with a dictionary
-symbolTable = [[]]
+symbolTable = [['' for _ in range(2)] for _ in range(128)]
 ROW = 128
 COL = 2
 syllableList = []
@@ -89,7 +89,7 @@ def RemoveUnwanted(input : str) -> str:
    "ൊ":"ൊ", "ോ":"ോ", "ല്‍‌":"ൽ", "ള്‍":"ൾ", "ര്‍":"ർ", "ന്‍":"ൻ", "ണ്‍":"ൺ"}
 
     output = ""
-    for c in str:
+    for c in input:
 
         if c in punctuationList: 
             continue
@@ -134,8 +134,9 @@ def GetFile(LangId : int, type : int) -> str:
 
 
 # function to replace SetlangId in lines 62-80 of unified.y
-def SetlangId(id : int):
+def SetlangId(fl : str):
     global langId, isSouth 
+    id = ord(fl)
     if(id>=3328 and id<=3455):
         currLang = MALAYALAM; #malayalam
     elif(id>=2944 and id<=3055):
@@ -160,7 +161,7 @@ def SetlangId(id : int):
     if(langId < 5):
         isSouth = 1
     if(langId == 0):
-        print(f"UNKNOWN LANGUAGE - id = {id}")
+        print(f"UNKNOWN LANGUAGE - id = {fl}")
         exit(-1)
     return 1
 
@@ -174,7 +175,7 @@ def SetlanguageFeat(input : str) -> int:
     with open(GetFile(0,0), 'r') as infile:
         lines = infile.readlines()
 
-    str1 = str
+    str1 = input
     length = len(str1)
     if (length == 0):
         length = 1
@@ -596,9 +597,14 @@ def CheckDictionary(input : str) -> int:
     fileName = GetFile(langId, 1)
     if (flags.DEBUG):
         print(f'dict : {fileName}')
-    
-    with open(fileName, 'r') as output:
-        cnts = output.readlines()
+    try:
+        with open(fileName, 'r') as output:
+            cnts = output.readlines()
+    except:
+        print(f'Dict not found')
+        if(langId == ENGLISH):
+            exit(1)
+        return 0
 
     if (langId == ENGLISH):
         input1 = ''
