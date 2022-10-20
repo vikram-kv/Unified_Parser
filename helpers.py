@@ -956,11 +956,12 @@ def WritetoFiles() -> int:
         syllablesPrint = 0
         for i in range(globals.syllableCount):
             globals.words.outputText += '(( '
+            l = globals.syllableList[i].split('&')
             for pch in l:
                 if pch == '':
                     continue
                 if globals.flags.DEBUG:
-                    print(f'syl  output{pch} {globals.words.outputText}')
+                    print(f'syl {pch}')
                 j = 1
                 globals.words.outputText += f'"{pch}" '
             if j != 0:
@@ -974,7 +975,7 @@ def WritetoFiles() -> int:
                     syllablesPrint += 1
                 globals.words.outputText += ') 0) '
             else:
-                globals.words.outputText = globals.words.outputText[:(len(globals.outputText) - 3)]
+                globals.words.outputText = globals.words.outputText[:(len(globals.words.outputText) - 3)]
             j = 0
     
         globals.words.outputText = globals.words.outputText.replace('v', '')
