@@ -7,3 +7,9 @@ using a list, map and a loop to do the corrections instead
 iii) handle file operation exceptions everywhere
 
 iv) correction in SchwaSpecificCorrection() check
+
+
+
+A) GetPhoneType - check later
+B) Check from GeminateCorrection onwards in helpers.py and parser.py fully
+

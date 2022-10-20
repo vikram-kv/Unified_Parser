@@ -85,7 +85,7 @@ def SetlangId(fl : str):
         globals.isSouth = 1
     if(globals.langId == 0):
         print(f"UNKNOWN LANGUAGE - id = {fl}")
-        exit(-1)
+        exit(0)
     return 1
 
 
@@ -93,8 +93,12 @@ def SetlangId(fl : str):
 def SetlanguageFeat(input : str) -> int:
 
     # open common file
-    with open(GetFile(0,0), 'r') as infile:
-        lines = infile.readlines()
+    try:
+        with open(GetFile(0,0), 'r') as infile:
+            lines = infile.readlines()
+    except:
+        print("Couldn't open common file for reading")
+        return 0
 
     str1 = input
     length = len(str1)
@@ -137,7 +141,7 @@ def ConvertToSymbols(input : str) -> str:
         if (ord(str1[j]) < 8204):
             globals.words.syllabifiedWord += "&" + globals.symbolTable[ord(str1[j])%128][1]
 
-    output = globals.words.syllabifiedWord
+    output = globals.words.syllabifiedWord[1:]
     return output
 
 
@@ -146,9 +150,10 @@ def WriteFile(text : str):
 
     output = open(globals.outputFile, 'w')
 
-    if (globals.flags.fliteHTSFlag):
+    if (globals.flags.fliteHTSFlag != 0):
+        text = text[:-1]
         print(f"phones : {text}")
-        output.write(text + '\n')
+        output.write(text)
         output.close()
         return 
     
@@ -157,7 +162,7 @@ def WriteFile(text : str):
     output.write("))\n")
 
     output.close()
-    if (globals.flags.writeFormat == 0 and globals.flags.pruiningFlag == 1):
+    if (globals.flags.writeFormat == 0 and globals.flags.pruiningFlag != 0):
         WritePruneFile(text)
 
 
@@ -201,7 +206,7 @@ def Checkeuv(input : str) -> int:
 def CheckSingleVowel(input : str, q : int) -> int:
     if (input in ['a', 'e', 'i', 'o', 'u']):
         return 1
-    if (q and input == 'q'):
+    if (q != 0 and input == 'q'):
         return 1
     return 0
 
@@ -250,7 +255,6 @@ def CheckChillu(input : str) -> int:
 def GetUTF(input : str) -> str :
     for i in range(globals.ROW):
         if (input == globals.symbolTable[i][1]):
-            
             return globals.symbolTable[i][0]
     
     return 0
@@ -271,13 +275,10 @@ def CleanseWord(phone : str) -> str:
             c = '#'
         phonecopy += c
 
-    if (phonecopy.find('$') != -1):
-        phonecopy = phonecopy.replace('$','')
-    if (phonecopy.find('&&') != -1):
-        phonecopy = phonecopy.replace('&&','&')
-    
-    return phonecopy
+    phonecopy = phonecopy.replace('$','')
+    phonecopy = phonecopy.replace('&&','&')
 
+    return phonecopy
 
 # replacement for funciton in lines 321 - 356. Correct if there is a vowel in the middle
 def MiddleVowel(phone : str) -> str:
@@ -321,7 +322,6 @@ def DoubleModifierCorrection(phone : str) -> str:
             phonecopy = phonecopy.replace(c1, '@')
             phonecopy = phonecopy.replace('@', c2)
 
-
     if (phonecopy.find("&#&hq&") != -1):
         phonecopy = phonecopy.replace("&#&hq&","&hq&#&")
     
@@ -330,10 +330,7 @@ def DoubleModifierCorrection(phone : str) -> str:
     
     return phonecopy
 
-
-
 # replacement for funciton in lines 462 - 495. //for eu&C&C&V
-
 def SchwaDoubleConsonent(phone : str) -> str:
 
     consonentList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh","n","p","ph","b","bh","m","y","r","l","w","sh","sx","zh","y","s","h","f","dxq"]
@@ -347,17 +344,13 @@ def SchwaDoubleConsonent(phone : str) -> str:
     for i in range(0,39):
         for j in range(0,39):
             for k in range(0,42):
-
                 c1 = f'&euv&{consonentList[i]}&{consonentList[j]}&{vowelList[k]}'
                 c2 = f'&euv&{consonentList[i]}&av&{consonentList[j]}&{vowelList[k]}'
                 phonecopy = phonecopy.replace(c1, '@')
                 phonecopy = phonecopy.replace('@', c2)
 
-    if (phonecopy.find("$") != -1):
-        phonecopy = phonecopy.replace("$","")
-    
+    phonecopy = phonecopy.replace("$","")
     return phonecopy
-
 
 # replacement for function in lines 498 - 585. //halant specific correction for aryan langs
 def SchwaSpecificCorrection(phone : str) -> str:
@@ -399,14 +392,13 @@ def SchwaSpecificCorrection(phone : str) -> str:
     if(globals.flags.DEBUG):
         print(f"inside schwa{phonecopy}\n")
     
-
     for i in range(0,38):
         c1 = f'&av&{schwaList[i]}&'
         c3 = f'&{schwaList[i]}&'
 
         for j in range(0,41):
             c4 = f'&euv&{c3}${vowelList[j]}'
-            c2 = f'c1{vowelList[j]}'
+            c2 = f'{c1}{vowelList[j]}'
             phonecopy = phonecopy.replace(c2, '@')
             phonecopy = phonecopy.replace('@', c4)
 
@@ -421,8 +413,10 @@ def SchwaSpecificCorrection(phone : str) -> str:
 
     return phonecopy
 
-# replacement for function in lines . //correct the geminate syllabification ,isReverse --reverse correction
 
+
+
+# replacement for function in lines . //correct the geminate syllabification ,isReverse --reverse correction
 def GeminateCorrection(phone : str, isReverse : int) -> str:
 
     geminateList = ["k","kh","lx","rx","g","gh","ng","c","ch","j","jh","nj","tx","txh","dx","dxh","nx","t","th","d","dh","n","p","ph","b","bh","m","y",
@@ -435,7 +429,6 @@ def GeminateCorrection(phone : str, isReverse : int) -> str:
         phonecopy = phonecopy.replace(c2, c1) if isReverse == 1 else phonecopy.replace(c1, c2)
     
     return phonecopy
-
 
 # replacement for function in  lines 356 - 430.  //Syllabilfy the words
 
@@ -501,7 +494,6 @@ def Syllabilfy(phone : str) -> str:
     phonecopy = phonecopy.replace("&eu&","@")
     phonecopy = phonecopy.replace("@","&eu&#&")
     return phonecopy
-
 
 # replacement for function in lines 279 - 317. //check the word in Dict.
 # REMOVED EXIT(1) ON ENGLISH. WAS USELESS
