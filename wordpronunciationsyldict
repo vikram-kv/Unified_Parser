@@ -1,1 +1,1 @@
-(set! wordstruct '( (( "hq" "lx" "aa" ) 0) (( "k" "i" ) 0) (( "w" "i" ) 0) (( "tx"  "tx" "aa" "nd"  ) 0) ))
+(set! wordstruct '( (( "hq" "p" "u" ) 0) (( "p" "u" ) 0) ))

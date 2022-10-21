@@ -2,9 +2,8 @@
 
 from ply.lex import lex
 from ply.yacc import yacc
-import globals
+from globals import *
 from helpers import *
-import sys
 
 # tokens identified by the lexer
 tokens = ('kaki_c', 'conjsyll2_c', 'fullvowel_b', 'kaki_a', 'kaki_b',  'conjsyll2_b', 'conjsyll2_a',
@@ -56,23 +55,21 @@ def p_sentence(p):
     '''
     sentence : words
     '''
-    if globals.flags.parseLevel == 0:
-        globals.words.syllabifiedWordOut = p[1]
+    if p.parser.g.flags.parseLevel == 0:
+        p.parser.g.words.syllabifiedWordOut = p[1]
 
-        if globals.words.syllabifiedWordOut.find('&&') != -1:
-            globals.words.syllabifiedWordOut = globals.words.syllabifiedWordOut.replace("&&","&")
+        if p.parser.g.words.syllabifiedWordOut.find('&&') != -1:
+            p.parser.g.words.syllabifiedWordOut = p.parser.g.words.syllabifiedWordOut.replace("&&","&")
         
-        globals.flags.parseLevel += 1
+        p.parser.g.flags.parseLevel += 1
     else:
-        globals.words.phonifiedWord = p[1]
+        p.parser.g.words.phonifiedWord = p[1]
 
 
 def p_words_syltoken(p):
     '''
     words : syltoken
     '''
-    if globals.flags.DEBUG:
-        print(f'\nSyll:\t{p[1]}')
     p[0] = p[1]
 
 def p_words_wordsandsyltoken(p):
@@ -106,8 +103,6 @@ def p_syltoken1(p):
              | kaki_a
              | kaki_b
     '''
-    if globals.flags.DEBUG:
-        print(f'kaki : {p[1]}')
     p[0] = p[1]
 
 def p_error(p):
@@ -133,98 +128,76 @@ def printHelp():
     print("Example: ./unified-parser 1 3 0 0 - Direct parser for USS fallback")
     print("Example: ./unified-parser 1 4 0 0 - Syllable parser with beg mid end")
 
-def main():
-    
-    globals.init()
+def wordparse(wd : str):
+    g = GLOBALS()
     lexer = lex()
     parser = yacc()
+    parser.g = g
 
-    argc = len(sys.argv)
-    argv = sys.argv
-    globals.flags.DEBUG = False
+    argv = ['parallelparser.py', wd, '0', '1', '1', '1', '0']
+    argc = len(argv)
     if argc <= 5:
         printHelp()
         exit(1)
     
     if argv[2] != '1':
-        globals.flags.LangSpecificCorrectionFlag = 0
+        g.flags.LangSpecificCorrectionFlag = 0
     
-    globals.flags.writeFormat = int(argv[3])
+    g.flags.writeFormat = int(argv[3])
     if argv[3] == '4':
-        globals.flags.writeFormat = 1
-        globals.flags.syllTagFlag = 1
+        g.flags.writeFormat = 1
+        g.flags.syllTagFlag = 1
     
     if argv[4] == '1':
-        globals.outputFile = 'wordpronunciationsyldict'
+        g.outputFile = 'wordpronunciationsyldict'
     
     if argv[5] == '1':
-        globals.flags.pruiningFlag = 1
-        globals.outputFile = 'wordpronunciation'
-        globals.flags.writeFormat = 3
+        g.flags.pruiningFlag = 1
+        g.outputFile = 'wordpronunciation'
+        g.flags.writeFormat = 3
     
     if argc > 6 and argv[6] == '1':
-        globals.flags.directParseFlag = 1
-        globals.langId = int(argv[7])
+        g.flags.directParseFlag = 1
+        g.langId = int(argv[7])
     
     if argc > 8:
-        globals.outputFile = 'wordpronunciation' + argv[8]
+        g.outputFile = 'wordpronunciation' + argv[8]
     else:
-        globals.outputFile = 'wordpronunciation'
+        g.outputFile = 'wordpronunciation'
         if argv[4] == '1':
-            globals.outputFile = 'wordpronunciationsyldict'
+            g.outputFile = 'wordpronunciationsyldict'
     
     word = argv[1]
-    if globals.flags.DEBUG:
-        print(f'Word {word}')
     
-    if globals.flags.directParseFlag != 1:
+    if g.flags.directParseFlag != 1:
         word = RemoveUnwanted(word)
-    if globals.flags.DEBUG:
-        print(f'Cleared Word : {word}')
     
-    if SetlanguageFeat(word) == 0:
+    if SetlanguageFeat(g, word) == 0:
         return 0
-    if globals.flags.directParseFlag == 1:
-        globals.langId = int(argv[7])
+    if g.flags.directParseFlag == 1:
+        g.langId = int(argv[7])
     
-    if CheckDictionary(word) != 0:
+    if CheckDictionary(g, word) != 0:
         return 0
-    if globals.flags.DEBUG:
-        print(f'langId : {globals.langId}')
-    word = ConvertToSymbols(word)
-    if globals.flags.directParseFlag == 1:
-        globals.words.syllabifiedWord = argv[1]
+    word = ConvertToSymbols(g, word)
+    if g.flags.directParseFlag == 1:
+        g.words.syllabifiedWord = argv[1]
         print(f'{word}')
-    
-    if globals.flags.DEBUG:
-        print(f"Symbols code : {globals.words.unicodeWord}");
-        print(f"Symbols syllables : {globals.words.syllabifiedWord}");
 
-    parser.parse(globals.words.syllabifiedWord)
+    parser.parse(g.words.syllabifiedWord)
+    g.words.syllabifiedWordOut = g.words.syllabifiedWordOut.replace("&#&","&") + '&'
+    g.words.syllabifiedWordOut = LangSpecificCorrection(g, g.words.syllabifiedWordOut, g.flags.LangSpecificCorrectionFlag)
+    g.words.syllabifiedWordOut = CleanseWord(g.words.syllabifiedWordOut)
 
-    if globals.flags.DEBUG:
-        print(f'Syllabified Word : {globals.words.syllabifiedWordOut}')
-    
-    globals.words.syllabifiedWordOut = globals.words.syllabifiedWordOut.replace("&#&","&") + '&'
-    if globals.flags.DEBUG:
-        print(f'Syllabified Word out : {globals.words.syllabifiedWordOut}')
-
-    globals.words.syllabifiedWordOut = LangSpecificCorrection(globals.words.syllabifiedWordOut, globals.flags.LangSpecificCorrectionFlag)
-    if globals.flags.DEBUG:
-        print(f'Syllabified Word langCorr : {globals.words.syllabifiedWordOut}')
-    globals.words.syllabifiedWordOut = CleanseWord(globals.words.syllabifiedWordOut)
-    if globals.flags.DEBUG:
-        print(f'Syllabified Word memCorr : {globals.words.syllabifiedWordOut}')
-
-    if not globals.isSouth:
+    if not g.isSouth:
         count = 0
-        for i in range(len(globals.words.syllabifiedWordOut)):
+        for i in range(len(g.words.syllabifiedWordOut)):
             if i == '&':
                 count += 1
         splitPosition = 2
-        if GetPhoneType(globals.words.syllabifiedWord, 1) == 1:
+        if GetPhoneType(g, g.words.syllabifiedWord, 1) == 1:
             if count > 2:
-                tpe = GetPhoneType(globals.words.syllabifiedWord, 2)
+                tpe = GetPhoneType(g, g.words.syllabifiedWord, 2)
                 if tpe == 2:
                     splitPosition = 1
                 elif tpe == 3:
@@ -232,52 +205,33 @@ def main():
             else:
                 splitPosition = 1
         count = 0
-        for i in range(len(globals.words.syllabifiedWordOut)):
-            if globals.words.syllabifiedWordOut[i] == '&':
+        for i in range(len(g.words.syllabifiedWordOut)):
+            if g.words.syllabifiedWordOut[i] == '&':
                 count += 1
             if count > splitPosition:
                 count = i
                 break
-        start, end = globals.words.syllabifiedWordOut, globals.words.syllabifiedWordOut
+        start, end = g.words.syllabifiedWordOut, g.words.syllabifiedWordOut
         end = end[count:]
         start = start[:count]
 
-        if globals.flags.DEBUG:
-            print(f'posi  {count} {start} {end}')
-        end = SchwaSpecificCorrection(end)
-        if globals.flags.DEBUG:
-            print(f'prefinal : {globals.words.syllabifiedWordOut}\n')
-        globals.words.syllabifiedWordOut = start + end
-        if globals.flags.DEBUG:
-            print(f'prefinal1 : {globals.words.syllabifiedWordOut}')
-        globals.words.syllabifiedWordOut = CleanseWord(globals.words.syllabifiedWordOut)
-        if globals.flags.DEBUG:
-            print(f'final : {globals.words.syllabifiedWord}')
-        globals.words.syllabifiedWordOut = SchwaDoubleConsonent(globals.words.syllabifiedWordOut)
-        if globals.flags.DEBUG:
-            print(f'final0 : {globals.words.syllabifiedWordOut}')
+        end = SchwaSpecificCorrection(g, end)
+        g.words.syllabifiedWordOut = start + end
+        g.words.syllabifiedWordOut = CleanseWord(g.words.syllabifiedWordOut)
+        g.words.syllabifiedWordOut = SchwaDoubleConsonent(g.words.syllabifiedWordOut)
     
-    globals.words.syllabifiedWordOut = GeminateCorrection(globals.words.syllabifiedWordOut, 0)
-    if globals.flags.DEBUG:
-        print(f'Syllabified Word gemCorr : {globals.words.syllabifiedWordOut}')
+    g.words.syllabifiedWordOut = GeminateCorrection(g.words.syllabifiedWordOut, 0)
     
-    globals.words.syllabifiedWordOut = MiddleVowel(globals.words.syllabifiedWordOut)
-    if globals.flags.DEBUG:
-        print(f'Syllabified Word gemCorr : {globals.words.syllabifiedWordOut}')
+    g.words.syllabifiedWordOut = MiddleVowel(g, g.words.syllabifiedWordOut)
 
-    globals.words.syllabifiedWordOut = Syllabilfy(globals.words.syllabifiedWordOut)
-    if globals.flags.DEBUG:
-        print(f'Syllabified Word final : {globals.words.syllabifiedWordOut}')
+    g.words.syllabifiedWordOut = Syllabilfy(g.words.syllabifiedWordOut)
     
-    SplitSyllables(globals.words.syllabifiedWordOut)
-    if globals.flags.DEBUG:
-        print('Splitted to Syllables')
+    SplitSyllables(g,g.words.syllabifiedWordOut)
     
-    WritetoFiles()
-    if globals.flags.DEBUG:
-        print(f'Files created {globals.words.outputText}')
-    print(globals.answer,end='')
+    WritetoFiles(g)
+    return g.answer
 
 if __name__ == '__main__':
-    main()
+    ans = wordparse('आपडीडीटीदवाराडाइसलफाइड')
+    print(ans)
     pass

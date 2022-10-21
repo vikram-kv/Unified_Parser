@@ -1,10 +1,10 @@
 import os, shutil
-import subprocess
-from unittest import result
+from parallelparser import wordparse
+import time
 
-infolder = input('Enter source folder name :')
+infolder = 'Original'
 
-outfolder = input('Enter dest folder name :')
+outfolder = 'Generated'
 
 if os.path.exists(outfolder):
     shutil.rmtree(outfolder)
@@ -19,12 +19,15 @@ for fname in os.listdir(infolder):
     results = []
     i = 0
     for l in cnts:
+        if i == 50:
+            break
         l = l.strip().split('\t')
         wd = l[0]
-        proc = subprocess.run(['python3', 'parser.py', wd, 'output/temp.txt', '1', '1', '1', '0'], capture_output=True)
-        results.append([wd, proc.stdout.decode('utf-8').strip()])
-        if i == 100:
-            break
+        t1 = time.time()
+        ans = wordparse(wd)
+        t2 = time.time()
+        print(f'{wd} - {t2-t1}')
+        results.append([wd, ans])
         i += 1
     
     with open(f'{outfolder}/{fname}', 'w') as f:
