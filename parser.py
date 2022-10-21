@@ -276,7 +276,7 @@ def main():
     WritetoFiles()
     if globals.flags.DEBUG:
         print(f'Files created {globals.words.outputText}')
-    print(globals.words.outputText)
+    print(globals.answer,end='')
 
 if __name__ == '__main__':
     main()

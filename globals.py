@@ -1,6 +1,7 @@
 # global CONSTANTs for languages. Uses the same values as the enum at 
 # lines 11-13 of unified.y
 
+
 class FLAGS:
     DEBUG = False
     parseLevel = 0
@@ -78,3 +79,5 @@ def init():
 
     # variable to indicate current language being parsed.
     currLang = ENGLISH
+    global answer
+    answer = ''

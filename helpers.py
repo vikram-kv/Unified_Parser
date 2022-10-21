@@ -160,6 +160,7 @@ def WriteFile(text : str):
     output.write("(set! wordstruct '( ")
     output.write(text)
     output.write("))\n")
+    globals.answer = f"(set! wordstruct '( {text}))"
 
     output.close()
     if (globals.flags.writeFormat == 0 and globals.flags.pruiningFlag != 0):
@@ -878,7 +879,6 @@ def SplitSyllables(input : str) -> int:
             elif euFlag == 2:
                 globals.syllableList[i] = globals.syllableList[i].replace("!","&euv&")
     else:
-        print(f" syll 0 {globals.syllableList[0]}")
         if (CheckVowel(globals.syllableList[0],1,0) == 0 and globals.flags.writeFormat != 3) or Checkeuv(globals.syllableList[0]) == 1:
             globals.syllableList[0] += '&av'
 
