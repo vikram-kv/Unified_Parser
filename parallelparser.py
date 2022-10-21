@@ -130,6 +130,7 @@ def printHelp():
 
 def wordparse(wd : str):
     g = GLOBALS()
+    g.flags.DEBUG = True
     lexer = lex()
     parser = yacc()
     parser.g = g
@@ -232,6 +233,6 @@ def wordparse(wd : str):
     return g.answer
 
 if __name__ == '__main__':
-    ans = wordparse('आपडीडीटीदवाराडाइसलफाइड')
+    ans = wordparse('कबाड़')
     print(ans)
     pass

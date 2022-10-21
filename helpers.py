@@ -14,14 +14,12 @@ def RemoveUnwanted(input : str) -> str:
 
     output = ""
     for c in input:
-
         if c in punctuationList: 
             continue
-        elif c in replaceDict.keys():
-            output += replaceDict[c]
-        else:
-            output += c
+        output += c
     
+    for k in replaceDict.keys():
+        output = output.replace(k, replaceDict[k])
     return output
 
 
@@ -1011,6 +1009,7 @@ def WritetoFiles(g : GLOBALS) -> int:
             j = 0
     
     g.words.outputText = g.words.outputText.replace('#', '')
+    g.words.outputText = g.words.outputText.replace('  ', ' ')
     if g.flags.DEBUG:
         print(f'Print text : {g.words.outputText}')
     
