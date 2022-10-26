@@ -5,7 +5,7 @@ from globals import *
 def RemoveUnwanted(input : str) -> str:
 
     # ignore punctuations
-    punctuationList = ["!",";",":","@","#","$","%","^","&","*",",",".","/","'","’","”","“","।"]
+    punctuationList = ["!",";",":","@","#","$","%","^","&","*",",",".","/","'","’","”","“","।", "]", "["]
 
     # replacing problematic unicode characters that look the same but have different encodings
     replaceDict =    {"ऩ":"ऩ", "ऱ":"ऱ", "क़":"क़", "ख़":"ख़", "ग़":"ग़", "ज़":"ज़", "ड़":"ड़", "ढ़":"ढ़", "ढ़":"ढ़", "फ़":"फ़", "य़":"य़", "ऴ":"ऴ",
