@@ -130,7 +130,6 @@ def printHelp():
 
 def wordparse(wd : str):
     g = GLOBALS()
-    g.flags.DEBUG = True
     lexer = lex()
     parser = yacc()
     parser.g = g

@@ -817,7 +817,9 @@ def SplitSyllables(g : GLOBALS, input : str) -> int:
     
     # ln -> len
     ln = len(g.syllableList)
-
+    if (ln == 0):
+        return 1
+    
     if g.flags.DEBUG:
         for i in range(ln):
             print(f"initStack : {g.syllableList[i]}\n")
