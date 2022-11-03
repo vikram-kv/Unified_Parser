@@ -130,8 +130,6 @@ def CheckSymbol(g : GLOBALS, input : str) -> int:
 
 # replacement for function in lines 249 - 276. Convert utf-8 to cps symbols
 def ConvertToSymbols(g : GLOBALS, input : str) -> str:
-
-    output = ""
     str1 = input
 
     g.words.syllabifiedWord = "&"
@@ -139,8 +137,8 @@ def ConvertToSymbols(g : GLOBALS, input : str) -> str:
         if (ord(str1[j]) < 8204):
             g.words.syllabifiedWord += "&" + g.symbolTable[ord(str1[j])%128][1]
 
-    output = g.words.syllabifiedWord[1:]
-    return output
+    g.words.syllabifiedWord = g.words.syllabifiedWord[1:]
+    return g.words.syllabifiedWord 
 
 
 # function in lines 1278 - 1299. write to wordpronunciation file
@@ -212,17 +210,14 @@ def CheckSingleVowel(input : str, q : int) -> int:
 # function in lines 616 - 629. get the type of phone in the position
 def GetPhoneType(g : GLOBALS, input : str, pos : int) -> int:
     phone = input
-    count = 1
-    i = 0
     phone = phone.split('&')
-
-    for pch in phone:
-        count = count + 1
-        if (count >= pos):
-            break
+    phone = list(filter(lambda x : x != '', phone))
+    pos = min(pos, len(phone))
+    pch = phone[pos - 1]
     
     if (g.flags.DEBUG):
-        print(f"str : {pch} {GetType(g, pch)}\n")
+        print(f'input : {input}')
+        print(f"str : {pch} {GetType(g, pch)}")
 
     return GetType(g, pch)
 
@@ -364,12 +359,12 @@ def SchwaSpecificCorrection(g : GLOBALS, phone : str) -> str:
     "a&","e&","i&","o&","u&"]
 
     if (g.flags.DEBUG):
-        print(f'{len(phone)}\n')
+        print(f'{len(phone)}')
     
     phonecopy = phone + '!'
 
     if (g.flags.DEBUG):
-        print(f'phone cur - {phonecopy}\n')
+        print(f'phone cur - {phonecopy}')
     
     # // for end correction &av&t&aav&. //dont want av
     for i in range(0,38):
@@ -388,7 +383,7 @@ def SchwaSpecificCorrection(g : GLOBALS, phone : str) -> str:
         phonecopy = phonecopy.replace('@', c2)
 
     if(g.flags.DEBUG):
-        print(f"inside schwa{phonecopy}\n")
+        print(f"inside schwa {phonecopy}")
     
     for i in range(0,38):
         c1 = f'&av&{schwaList[i]}&'
@@ -518,7 +513,7 @@ def CheckDictionary(g : GLOBALS, input : str) -> int:
         l = l.strip().split('\t')
         assert(len(l) == 3)
         if g.flags.DEBUG:
-            print(f"word : {l[0]}\n")
+            print(f"word : {l[0]}")
         if input == l[0]:
             if g.flags.DEBUG:
                 print(f"match found")
@@ -822,7 +817,7 @@ def SplitSyllables(g : GLOBALS, input : str) -> int:
     
     if g.flags.DEBUG:
         for i in range(ln):
-            print(f"initStack : {g.syllableList[i]}\n")
+            print(f"initStack : {g.syllableList[i]}")
     
     # //south specific av addition
     if CheckVowel(g.syllableList[ln-1],1,0) == 0 and CheckChillu(g.syllableList[ln-1]) == 0:

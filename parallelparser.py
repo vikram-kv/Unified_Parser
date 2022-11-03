@@ -4,6 +4,7 @@ from ply.lex import lex
 from ply.yacc import yacc
 from globals import *
 from helpers import *
+import sys
 
 # tokens identified by the lexer
 tokens = ('kaki_c', 'conjsyll2_c', 'fullvowel_b', 'kaki_a', 'kaki_b',  'conjsyll2_b', 'conjsyll2_a',
@@ -12,7 +13,7 @@ tokens = ('kaki_c', 'conjsyll2_c', 'fullvowel_b', 'kaki_a', 'kaki_b',  'conjsyll
 # lexical analyzer part
 
 def t_kaki_c(t):
-    r'(\&)*(k|kh|lx|rx|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|r|l|w|sh|sx|zh|y|s|h|f|dxq|z|kq|khq|gq|dxhq)((&)(lx|k|kh|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|ex|rx|f|dxq|z|kq|khq|gq|dxhq))*'
+    r'(&)*(k|kh|lx|rx|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|r|l|w|sh|sx|zh|y|s|h|f|dxq|z|kq|khq|gq|dxhq)((&)(lx|k|kh|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|ex|rx|f|dxq|z|kq|khq|gq|dxhq))*'
     s = t.value
     ans = ''
     i = 1
@@ -65,11 +66,12 @@ def p_sentence(p):
     else:
         p.parser.g.words.phonifiedWord = p[1]
 
-
 def p_words_syltoken(p):
     '''
     words : syltoken
     '''
+    if(p.parser.g.flags.DEBUG):
+        print(f"Syll:\t{p[1]}")
     p[0] = p[1]
 
 def p_words_wordsandsyltoken(p):
@@ -103,6 +105,8 @@ def p_syltoken1(p):
              | kaki_a
              | kaki_b
     '''
+    if (p.parser.g.flags.DEBUG):
+        print(f'kaki : {p[1]}')
     p[0] = p[1]
 
 def p_error(p):
@@ -133,6 +137,7 @@ def wordparse(wd : str):
     lexer = lex()
     parser = yacc()
     parser.g = g
+    g.flags.DEBUG = True
 
     argv = ['parallelparser.py', wd, '0', '1', '1', '1', '0']
     argc = len(argv)
@@ -169,9 +174,15 @@ def wordparse(wd : str):
     
     word = argv[1]
     
+    if g.flags.DEBUG:
+        print(f'Word : {word}')
+
     if g.flags.directParseFlag != 1:
         word = RemoveUnwanted(word)
-    
+
+    if g.flags.DEBUG:
+        print(f'Cleared Word : {word}')
+
     if SetlanguageFeat(g, word) == 0:
         return 0
     if g.flags.directParseFlag == 1:
@@ -179,25 +190,44 @@ def wordparse(wd : str):
     
     if CheckDictionary(g, word) != 0:
         return 0
+    if g.flags.DEBUG:
+        print(f'langId : {g.langId}')
+    
     word = ConvertToSymbols(g, word)
     if g.flags.directParseFlag == 1:
         g.words.syllabifiedWord = argv[1]
         print(f'{word}')
 
+    if g.flags.DEBUG:
+        print(f"Symbols code : {g.words.unicodeWord}")
+        print(f"Symbols syllables : {g.words.syllabifiedWord}")
+
     parser.parse(g.words.syllabifiedWord)
+    if(g.flags.DEBUG):
+        print(f"Syllabified Word : {g.words.syllabifiedWordOut}")
     g.words.syllabifiedWordOut = g.words.syllabifiedWordOut.replace("&#&","&") + '&'
+    if(g.flags.DEBUG):
+        print(f"Syllabified Word out : {g.words.syllabifiedWordOut}")
     g.words.syllabifiedWordOut = LangSpecificCorrection(g, g.words.syllabifiedWordOut, g.flags.LangSpecificCorrectionFlag)
+    if(g.flags.DEBUG):
+        print(f"Syllabified Word langCorr : {g.words.syllabifiedWordOut}")
+    if(g.flags.DEBUG):
+        print(f"Syllabified Word gemCorr : {g.words.syllabifiedWordOut}")
     g.words.syllabifiedWordOut = CleanseWord(g.words.syllabifiedWordOut)
+    if(g.flags.DEBUG):
+        print(f"Syllabified Word memCorr : {g.words.syllabifiedWordOut}")
 
     if not g.isSouth:
+        if g.flags.DEBUG:
+            print('NOT SOUTH')
         count = 0
         for i in range(len(g.words.syllabifiedWordOut)):
-            if i == '&':
+            if g.words.syllabifiedWordOut[i] == '&':
                 count += 1
         splitPosition = 2
-        if GetPhoneType(g, g.words.syllabifiedWord, 1) == 1:
+        if GetPhoneType(g, g.words.syllabifiedWordOut, 1) == 1:
             if count > 2:
-                tpe = GetPhoneType(g, g.words.syllabifiedWord, 2)
+                tpe = GetPhoneType(g, g.words.syllabifiedWordOut, 2)
                 if tpe == 2:
                     splitPosition = 1
                 elif tpe == 3:
@@ -214,11 +244,20 @@ def wordparse(wd : str):
         start, end = g.words.syllabifiedWordOut, g.words.syllabifiedWordOut
         end = end[count:]
         start = start[:count]
-
+        if(g.flags.DEBUG):
+            print(f"posi {count} {start} {end}")
         end = SchwaSpecificCorrection(g, end)
+        if(g.flags.DEBUG):
+            print(f"prefinal : {g.words.syllabifiedWordOut}")
         g.words.syllabifiedWordOut = start + end
+        if(g.flags.DEBUG):
+            print(f"prefinal1 : {g.words.syllabifiedWordOut}")
         g.words.syllabifiedWordOut = CleanseWord(g.words.syllabifiedWordOut)
+        if(g.flags.DEBUG):
+            print(f"final : {g.words.syllabifiedWordOut}")
         g.words.syllabifiedWordOut = SchwaDoubleConsonent(g.words.syllabifiedWordOut)
+        if(g.flags.DEBUG):
+            print(f"final0 : {g.words.syllabifiedWordOut}")
     
     g.words.syllabifiedWordOut = GeminateCorrection(g.words.syllabifiedWordOut, 0)
     
@@ -231,7 +270,91 @@ def wordparse(wd : str):
     WritetoFiles(g)
     return g.answer
 
+def debug_lexer(wd):
+    g = GLOBALS()
+    lexer = lex()
+    lexer.g = g
+    g.flags.DEBUG = True
+
+    argv = ['parallelparser.py', wd, '0', '1', '1', '1', '0']
+    argc = len(argv)
+    if argc <= 5:
+        printHelp()
+        exit(1)
+    
+    if argv[2] != '1':
+        g.flags.LangSpecificCorrectionFlag = 0
+    
+    g.flags.writeFormat = int(argv[3])
+    if argv[3] == '4':
+        g.flags.writeFormat = 1
+        g.flags.syllTagFlag = 1
+    
+    if argv[4] == '1':
+        g.outputFile = 'wordpronunciationsyldict'
+    
+    if argv[5] == '1':
+        g.flags.pruiningFlag = 1
+        g.outputFile = 'wordpronunciation'
+        g.flags.writeFormat = 3
+    
+    if argc > 6 and argv[6] == '1':
+        g.flags.directParseFlag = 1
+        g.langId = int(argv[7])
+    
+    if argc > 8:
+        g.outputFile = 'wordpronunciation' + argv[8]
+    else:
+        g.outputFile = 'wordpronunciation'
+        if argv[4] == '1':
+            g.outputFile = 'wordpronunciationsyldict'
+    
+    word = argv[1]
+    
+    if g.flags.DEBUG:
+        print(f'Word : {word}')
+
+    if g.flags.directParseFlag != 1:
+        word = RemoveUnwanted(word)
+
+    if g.flags.DEBUG:
+        print(f'Cleared Word : {word}')
+
+    if SetlanguageFeat(g, word) == 0:
+        return 0
+    if g.flags.directParseFlag == 1:
+        g.langId = int(argv[7])
+    
+    if CheckDictionary(g, word) != 0:
+        return 0
+    if g.flags.DEBUG:
+        print(f'langId : {g.langId}')
+    
+    word = ConvertToSymbols(g, word)
+    if g.flags.directParseFlag == 1:
+        g.words.syllabifiedWord = argv[1]
+        print(f'{word}')
+
+    if g.flags.DEBUG:
+        print(f"Symbols code : {g.words.unicodeWord}")
+        print(f"Symbols syllables : {g.words.syllabifiedWord}")
+    
+    lexer.input(g.words.syllabifiedWord)
+
+    while True:
+        tok = lexer.token()
+        if not tok:
+            break
+        print(tok)
+
+
 if __name__ == '__main__':
-    ans = wordparse('कबाड़')
-    print(ans)
+
+    if (len(sys.argv) != 2):
+        print('Incorrect Usage')
+        exit(-1)
+
+    # ans = wordparse(sys.argv[1])
+    # print(ans)
+    debug_lexer(sys.argv[1])
     pass
