@@ -11,10 +11,11 @@ tokens = ('kaki_c', 'conjsyll2_c', 'fullvowel_b', 'kaki_a', 'kaki_b',  'conjsyll
 'conjsyll1', 'nukchan_b','nukchan_a', 'yarule', 'fullvowel_a', 'consonant', 'vowel', 'halant', 'matra')
 
 # lexical analyzer part
-
+# r'(&)*(k|kh|lx|rx|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|dh|d|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|f|dxq|z|kq|khq|gq|dxhq)((&)(lx|k|kh|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|ex|rx|f|dxq|z|kq|khq|gq|dxhq))*'
 def t_kaki_c(t):
-    r'(&)*(k|kh|lx|rx|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|r|l|w|sh|sx|zh|y|s|h|f|dxq|z|kq|khq|gq|dxhq)((&)(lx|k|kh|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|ex|rx|f|dxq|z|kq|khq|gq|dxhq))*'
+    r'(&)*(dxhq|txh|khq|dxq|dxh|zh|tx|th|sx|sh|rx|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)((&)(dxhq|txh|khq|dxq|dxh|zh|tx|th|sx|sh|rx|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|ex|dx|dh|ch|bh|z|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b))*'
     s = t.value
+    print('c - '+s)
     ans = ''
     i = 1
     if s[0] == '&':
@@ -34,16 +35,16 @@ def t_conjsyll2_c(t):
     t.value = 'eu&#'
     return t
 
-t_fullvowel_b = r'(&)*(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|s|lx|h|kq|khq|gq|z|dxq|dxhq|f|y)(&)(a|aa|i|ii|u|uu|rq|ee|ei|o|ou|ax|a&mq|a&q|a&hq|aa&mq|aa&q|aa&hq|i&mq|ii&q|ii&hq|i&q|i&hq|ii&mq|u&mq|u&q|u&hq|uu&mq|uu&q|uu&hq|rq&mq|rq&q|rq&hq|ee&mq|ee&q|ee&hq|ei&mq|ei&q|ei&hq|o&mq|o&q|o&hq|ou&mq|ou&q|ou&hq)'
-t_kaki_a = r'(&)*(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|lx|w|sh|sx|s|h|kq|khq|gq|z|dxq|dxhq|f|y)(&)(aav|iv|iiv|uv|uuv|rqv|aev|eev|eiv|ax|ov|ouv|q|hq|mq)(&)(mq|q|hq)*'
-t_kaki_b = r'(&)*(dxq&aav|dxq&iv|dxq&iiv|dxq&uv|dxq&uuv|dxq&rqv|dxq|dxq&eev|dxq&eiv|dxq&ov|dxq&ouv|dxq&mq|dxq&q|dxq&hq)'
-t_conjsyll2_b = r'(&)*(k&eu|kh&eu|g&eu|gh&eu|c&eu|ch&eu|j&eu|jh&eu|ng&eu|nj&eu|tx&eu|txh&eu|dx&eu|dxh&eu|nx&eu|t&eu|th&eu|d&eu|dh&eu|n&eu|p&eu|ph&eu|b&eu|bh&eu|m&eu|y&eu|r&eu|l&eu|lx&eu|w&eu|sh&eu|sx&eu|s&eu|h&eu)'
-t_conjsyll2_a = r'(&)*(kq|khq|gq|z|dxq|dxhq|f|y)(&)eu'
-t_conjsyll1 = r'(&)*(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|lx|w|sh|sx|s|h|kq|khq|gq|z|dxq|dxhq|f|y)(&)(aa|i|ii|u|uu|rq|ee|ei|o|ou|ax)(&)(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|s|h|kq|khq|gq|z|dxq|dxhq|f|aa|i|ii|u|uu|rq|ee|ei|o|ou|aav|iv|iiv|uv|uuv|rqv|aev|eev|eiv|ax|ov|ouv|mq|q|hq)(&)eu(&)(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|s|h|kq|khq|gq|z|dxq|dxhq|f|y)'
-t_nukchan_b = r'(&)*(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|lx|w|sh|sx|s|h)(&)(mq|q|hq)'
-t_nukchan_a = r'(&)*(kq|khq|gq|z|dxq|dxhq|f|y)(&)(mq|q|hq)'
-t_yarule = r'(&)*(iv|iiv|uv|uuv|rqv)(&)(y)'
-t_vowel = r'(&)*(a|aa|i|ii|u|uu|rq|ee|ei|o|ou|ax|a&mq|a&q|a&hq|aa&mq|aa&q|aa&hq|i&mq|ii&q|ii&hq|i&q|i&hq|ii&mq|u&mq|u&q|u&hq|uu&mq|uu&q|uu&hq|rq&mq|rq&q|rq&hq|ee&mq|ee&q|ee&hq|ei&mq|ei&q|ei&hq|o&mq|o&q|o&hq|ou&mq|ou&q|ou&hq)'
+t_fullvowel_b = r'(&)*(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|s|lx|h|kq|khq|gq|z|dxq|dxhq|f|y)(&)(uu&mq|uu&hq|rq&mq|rq&hq|ou&mq|ou&hq|ii&mq|ii&hq|ei&mq|ei&hq|ee&mq|ee&hq|aa&mq|aa&hq|uu&q|u&mq|u&hq|rq&q|ou&q|o&mq|o&hq|ii&q|i&mq|i&hq|ei&q|ee&q|aa&q|a&mq|a&hq|u&q|o&q|i&q|a&q|uu|rq|ou|ii|ei|ee|ax|aa|u|o|i|a)'
+t_kaki_a = r'(&)*(dxhq|txh|khq|dxq|dxh|tx|th|sx|sh|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)(&)(uuv|rqv|ouv|iiv|eiv|eev|aev|aav|uv|ov|mq|iv|hq|ax|q)(&)(mq|hq|q)*'
+t_kaki_b = r'(&)*(dxq&uuv|dxq&rqv|dxq&ouv|dxq&iiv|dxq&eiv|dxq&eev|dxq&aav|dxq&uv|dxq&ov|dxq&mq|dxq&iv|dxq&hq|dxq&q|dxq)'
+t_conjsyll2_b = r'(&)*(txh&eu|dxh&eu|tx&eu|th&eu|sx&eu|sh&eu|ph&eu|nx&eu|nj&eu|ng&eu|lx&eu|kh&eu|jh&eu|gh&eu|dx&eu|dh&eu|ch&eu|bh&eu|y&eu|w&eu|t&eu|s&eu|r&eu|p&eu|n&eu|m&eu|l&eu|k&eu|j&eu|h&eu|g&eu|d&eu|c&eu|b&eu)'
+t_conjsyll2_a = r'(&)*(dxhq|khq|dxq|kq|gq|z|y|f)(&)eu'
+t_conjsyll1 = r'(&)*(dxhq|txh|khq|dxq|dxh|tx|th|sx|sh|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)(&)(uu|rq|ou|ii|ei|ee|ax|aa|u|o|i)(&)(dxhq|uuv|txh|rqv|ouv|khq|iiv|eiv|eev|dxq|dxh|aev|aav|uv|uu|tx|th|sx|sh|rq|ph|ov|ou|nx|nj|ng|mq|kq|kh|jh|iv|ii|hq|gq|gh|ei|ee|dx|dh|ch|bh|ax|aa|z|y|w|u|t|s|r|q|p|o|n|m|l|k|j|i|h|g|f|d|c|b)(&)eu(&)(dxhq|txh|khq|dxq|dxh|tx|th|sx|sh|ph|nx|nj|ng|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)'
+t_nukchan_b = r'(&)*(txh|dxh|tx|th|sx|sh|ph|nx|nj|ng|lx|kh|jh|gh|dx|dh|ch|bh|y|w|t|s|r|p|n|m|l|k|j|h|g|d|c|b)(&)(mq|hq|q)'
+t_nukchan_a = r'(&)*(dxhq|khq|dxq|kq|gq|z|y|f)(&)(mq|hq|q)'
+t_yarule = r'(&)*(uuv|rqv|iiv|uv|iv)(&)(y)'
+t_vowel = r'(&)*(uu&mq|uu&hq|rq&mq|rq&hq|ou&mq|ou&hq|ii&mq|ii&hq|ei&mq|ei&hq|ee&mq|ee&hq|aa&mq|aa&hq|uu&q|u&mq|u&hq|rq&q|ou&q|o&mq|o&hq|ii&q|i&mq|i&hq|ei&q|ee&q|aa&q|a&mq|a&hq|u&q|o&q|i&q|a&q|uu|rq|ou|ii|ei|ee|ax|aa|u|o|i|a)'
 t_fullvowel_a = r'.'
 
 def t_error(t):
@@ -78,6 +79,8 @@ def p_words_wordsandsyltoken(p):
     '''
     words : words syltoken
     '''
+    if(p.parser.g.flags.DEBUG):
+        print(f"Syll:\t{p[2]}")
     p[0] = p[1] + p[2]
 
 def p_syltoken(p):
@@ -275,71 +278,7 @@ def debug_lexer(wd):
     lexer = lex()
     lexer.g = g
     g.flags.DEBUG = True
-
-    argv = ['parallelparser.py', wd, '0', '1', '1', '1', '0']
-    argc = len(argv)
-    if argc <= 5:
-        printHelp()
-        exit(1)
-    
-    if argv[2] != '1':
-        g.flags.LangSpecificCorrectionFlag = 0
-    
-    g.flags.writeFormat = int(argv[3])
-    if argv[3] == '4':
-        g.flags.writeFormat = 1
-        g.flags.syllTagFlag = 1
-    
-    if argv[4] == '1':
-        g.outputFile = 'wordpronunciationsyldict'
-    
-    if argv[5] == '1':
-        g.flags.pruiningFlag = 1
-        g.outputFile = 'wordpronunciation'
-        g.flags.writeFormat = 3
-    
-    if argc > 6 and argv[6] == '1':
-        g.flags.directParseFlag = 1
-        g.langId = int(argv[7])
-    
-    if argc > 8:
-        g.outputFile = 'wordpronunciation' + argv[8]
-    else:
-        g.outputFile = 'wordpronunciation'
-        if argv[4] == '1':
-            g.outputFile = 'wordpronunciationsyldict'
-    
-    word = argv[1]
-    
-    if g.flags.DEBUG:
-        print(f'Word : {word}')
-
-    if g.flags.directParseFlag != 1:
-        word = RemoveUnwanted(word)
-
-    if g.flags.DEBUG:
-        print(f'Cleared Word : {word}')
-
-    if SetlanguageFeat(g, word) == 0:
-        return 0
-    if g.flags.directParseFlag == 1:
-        g.langId = int(argv[7])
-    
-    if CheckDictionary(g, word) != 0:
-        return 0
-    if g.flags.DEBUG:
-        print(f'langId : {g.langId}')
-    
-    word = ConvertToSymbols(g, word)
-    if g.flags.directParseFlag == 1:
-        g.words.syllabifiedWord = argv[1]
-        print(f'{word}')
-
-    if g.flags.DEBUG:
-        print(f"Symbols code : {g.words.unicodeWord}")
-        print(f"Symbols syllables : {g.words.syllabifiedWord}")
-    
-    lexer.input(g.words.syllabifiedWord)
+    lexer.input(wd)
 
     while True:
         tok = lexer.token()
@@ -356,5 +295,6 @@ if __name__ == '__main__':
 
     # ans = wordparse(sys.argv[1])
     # print(ans)
-    debug_lexer(sys.argv[1])
+
+    debug_lexer('&a&dh&hq&s&aav&q&w&eev&d&n&iv&k')
     pass
