@@ -1,55 +1,14 @@
 # combined lexical analyzer and parser
 
-from ply.lex import lex
+from ply.lex import Lexer
 from ply.yacc import yacc
 from globals import *
 from helpers import *
 import sys
 
-# tokens identified by the lexer
+# tokens used
 tokens = ('kaki_c', 'conjsyll2_c', 'fullvowel_b', 'kaki_a', 'kaki_b',  'conjsyll2_b', 'conjsyll2_a',
-'conjsyll1', 'nukchan_b','nukchan_a', 'yarule', 'fullvowel_a', 'consonant', 'vowel', 'halant', 'matra')
-
-# lexical analyzer part
-# r'(&)*(k|kh|lx|rx|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|dh|d|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|f|dxq|z|kq|khq|gq|dxhq)((&)(lx|k|kh|g|gh|ng|c|ch|j|jh|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|zh|y|s|h|ex|rx|f|dxq|z|kq|khq|gq|dxhq))*'
-def t_kaki_c(t):
-    r'(&)*(dxhq|txh|khq|dxq|dxh|zh|tx|th|sx|sh|rx|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)((&)(dxhq|txh|khq|dxq|dxh|zh|tx|th|sx|sh|rx|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|ex|dx|dh|ch|bh|z|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b))*'
-    s = t.value
-    print('c - '+s)
-    ans = ''
-    i = 1
-    if s[0] == '&':
-        ans += '&'
-    l = s.split('&')
-    for pch in l:
-        if pch == '':
-            continue
-        ans += f'{pch}&av&#&&'
-        i += 1
-    ans = ans[:(len(ans) - 7)]
-    t.value = ans
-    return t
-
-def t_conjsyll2_c(t):
-    r'(eu)'
-    t.value = 'eu&#'
-    return t
-
-t_fullvowel_b = r'(&)*(k|kh|g|gh|c|ch|j|jh|ng|nj|tx|txh|dx|dxh|nx|t|th|d|dh|n|p|ph|b|bh|m|y|r|l|w|sh|sx|s|lx|h|kq|khq|gq|z|dxq|dxhq|f|y)(&)(uu&mq|uu&hq|rq&mq|rq&hq|ou&mq|ou&hq|ii&mq|ii&hq|ei&mq|ei&hq|ee&mq|ee&hq|aa&mq|aa&hq|uu&q|u&mq|u&hq|rq&q|ou&q|o&mq|o&hq|ii&q|i&mq|i&hq|ei&q|ee&q|aa&q|a&mq|a&hq|u&q|o&q|i&q|a&q|uu|rq|ou|ii|ei|ee|ax|aa|u|o|i|a)'
-t_kaki_a = r'(&)*(dxhq|txh|khq|dxq|dxh|tx|th|sx|sh|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)(&)(uuv|rqv|ouv|iiv|eiv|eev|aev|aav|uv|ov|mq|iv|hq|ax|q)(&)(mq|hq|q)*'
-t_kaki_b = r'(&)*(dxq&uuv|dxq&rqv|dxq&ouv|dxq&iiv|dxq&eiv|dxq&eev|dxq&aav|dxq&uv|dxq&ov|dxq&mq|dxq&iv|dxq&hq|dxq&q|dxq)'
-t_conjsyll2_b = r'(&)*(txh&eu|dxh&eu|tx&eu|th&eu|sx&eu|sh&eu|ph&eu|nx&eu|nj&eu|ng&eu|lx&eu|kh&eu|jh&eu|gh&eu|dx&eu|dh&eu|ch&eu|bh&eu|y&eu|w&eu|t&eu|s&eu|r&eu|p&eu|n&eu|m&eu|l&eu|k&eu|j&eu|h&eu|g&eu|d&eu|c&eu|b&eu)'
-t_conjsyll2_a = r'(&)*(dxhq|khq|dxq|kq|gq|z|y|f)(&)eu'
-t_conjsyll1 = r'(&)*(dxhq|txh|khq|dxq|dxh|tx|th|sx|sh|ph|nx|nj|ng|lx|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)(&)(uu|rq|ou|ii|ei|ee|ax|aa|u|o|i)(&)(dxhq|uuv|txh|rqv|ouv|khq|iiv|eiv|eev|dxq|dxh|aev|aav|uv|uu|tx|th|sx|sh|rq|ph|ov|ou|nx|nj|ng|mq|kq|kh|jh|iv|ii|hq|gq|gh|ei|ee|dx|dh|ch|bh|ax|aa|z|y|w|u|t|s|r|q|p|o|n|m|l|k|j|i|h|g|f|d|c|b)(&)eu(&)(dxhq|txh|khq|dxq|dxh|tx|th|sx|sh|ph|nx|nj|ng|kq|kh|jh|gq|gh|dx|dh|ch|bh|z|y|y|w|t|s|r|p|n|m|l|k|j|h|g|f|d|c|b)'
-t_nukchan_b = r'(&)*(txh|dxh|tx|th|sx|sh|ph|nx|nj|ng|lx|kh|jh|gh|dx|dh|ch|bh|y|w|t|s|r|p|n|m|l|k|j|h|g|d|c|b)(&)(mq|hq|q)'
-t_nukchan_a = r'(&)*(dxhq|khq|dxq|kq|gq|z|y|f)(&)(mq|hq|q)'
-t_yarule = r'(&)*(uuv|rqv|iiv|uv|iv)(&)(y)'
-t_vowel = r'(&)*(uu&mq|uu&hq|rq&mq|rq&hq|ou&mq|ou&hq|ii&mq|ii&hq|ei&mq|ei&hq|ee&mq|ee&hq|aa&mq|aa&hq|uu&q|u&mq|u&hq|rq&q|ou&q|o&mq|o&hq|ii&q|i&mq|i&hq|ei&q|ee&q|aa&q|a&mq|a&hq|u&q|o&q|i&q|a&q|uu|rq|ou|ii|ei|ee|ax|aa|u|o|i|a)'
-t_fullvowel_a = r'.'
-
-def t_error(t):
-    print('Lexer error')
-    exit(1)
+        'conjsyll1', 'nukchan_b','nukchan_a', 'yarule', 'fullvowel_a', 'vowel')
 
 # parser part
 
@@ -94,10 +53,7 @@ def p_syltoken(p):
              | nukchan_b
              | nukchan_a
              | yarule
-             | consonant
              | vowel
-             | halant
-             | matra
     '''
     p[0] = p[1]
 
@@ -137,7 +93,7 @@ def printHelp():
 
 def wordparse(wd : str):
     g = GLOBALS()
-    lexer = lex()
+    lexer = Lexer()
     parser = yacc()
     parser.g = g
     g.flags.DEBUG = True
@@ -205,7 +161,7 @@ def wordparse(wd : str):
         print(f"Symbols code : {g.words.unicodeWord}")
         print(f"Symbols syllables : {g.words.syllabifiedWord}")
 
-    parser.parse(g.words.syllabifiedWord)
+    parser.parse(g.words.syllabifiedWord, lexer=lexer)
     if(g.flags.DEBUG):
         print(f"Syllabified Word : {g.words.syllabifiedWordOut}")
     g.words.syllabifiedWordOut = g.words.syllabifiedWordOut.replace("&#&","&") + '&'
@@ -273,28 +229,11 @@ def wordparse(wd : str):
     WritetoFiles(g)
     return g.answer
 
-def debug_lexer(wd):
-    g = GLOBALS()
-    lexer = lex()
-    lexer.g = g
-    g.flags.DEBUG = True
-    lexer.input(wd)
-
-    while True:
-        tok = lexer.token()
-        if not tok:
-            break
-        print(tok)
-
-
 if __name__ == '__main__':
 
     if (len(sys.argv) != 2):
         print('Incorrect Usage')
         exit(-1)
 
-    # ans = wordparse(sys.argv[1])
-    # print(ans)
-
-    debug_lexer('&a&dh&hq&s&aav&q&w&eev&d&n&iv&k')
-    pass
+    ans = wordparse(sys.argv[1])
+    print(ans)
