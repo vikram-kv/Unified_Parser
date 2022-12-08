@@ -20,7 +20,7 @@ def p_sentence(p):
         p.parser.g.words.syllabifiedWordOut = p[1]
 
         if p.parser.g.words.syllabifiedWordOut.find('&&') != -1:
-            p.parser.g.words.syllabifiedWordOut = p.parser.g.words.syllabifiedWordOut.replace("&&","&")
+            p.parser.g.words.syllabifiedWordOut = rec_replace(p.parser.g.words.syllabifiedWordOut,'&&','&')
         
         p.parser.g.flags.parseLevel += 1
     else:
@@ -164,7 +164,7 @@ def wordparse(wd : str):
     parser.parse(g.words.syllabifiedWord, lexer=lexer)
     if(g.flags.DEBUG):
         print(f"Syllabified Word : {g.words.syllabifiedWordOut}")
-    g.words.syllabifiedWordOut = g.words.syllabifiedWordOut.replace("&#&","&") + '&'
+    g.words.syllabifiedWordOut = rec_replace(g.words.syllabifiedWordOut, '&#&','&') + '&'
     if(g.flags.DEBUG):
         print(f"Syllabified Word out : {g.words.syllabifiedWordOut}")
     g.words.syllabifiedWordOut = LangSpecificCorrection(g, g.words.syllabifiedWordOut, g.flags.LangSpecificCorrectionFlag)
@@ -219,9 +219,7 @@ def wordparse(wd : str):
             print(f"final0 : {g.words.syllabifiedWordOut}")
     
     g.words.syllabifiedWordOut = GeminateCorrection(g.words.syllabifiedWordOut, 0)
-    
     g.words.syllabifiedWordOut = MiddleVowel(g, g.words.syllabifiedWordOut)
-
     g.words.syllabifiedWordOut = Syllabilfy(g.words.syllabifiedWordOut)
     
     SplitSyllables(g,g.words.syllabifiedWordOut)

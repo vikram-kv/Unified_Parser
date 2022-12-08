@@ -4,7 +4,7 @@
 class FLAGS:
     DEBUG = False
     parseLevel = 0
-    pruiningFlag = 0
+    pruningFlag = 0
     syllTagFlag = 0
     fliteHTSFlag = 0
     doubleParseSyl = 0
