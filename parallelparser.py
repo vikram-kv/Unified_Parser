@@ -96,7 +96,7 @@ def wordparse(wd : str):
     lexer = Lexer()
     parser = yacc()
     parser.g = g
-    g.flags.DEBUG = True
+    g.flags.DEBUG = False
 
     argv = ['parallelparser.py', wd, '0', '1', '1', '1', '0']
     argc = len(argv)
