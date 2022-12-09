@@ -144,34 +144,21 @@ def ConvertToSymbols(g : GLOBALS, input : str) -> str:
 
 # function in lines 1278 - 1299. write to wordpronunciation file
 def WriteFile(g : GLOBALS, text : str):
-    output = open(g.outputFile, 'w')
-    if (g.flags.fliteHTSFlag != 0):
-        text = text[:-1]
-        print(f"phones : {text}")
-        output.write(text)
-        output.close()
-        return 
-    
-    output.write("(set! wordstruct '( ")
-    output.write(text)
-    output.write("))\n")
     g.answer = f"(set! wordstruct '( {text}))"
+    # if (g.flags.writeFormat == 0 and g.flags.pruningFlag != 0):
+    #     WritePruneFile(g, text)
 
-    output.close()
-    if (g.flags.writeFormat == 0 and g.flags.pruningFlag != 0):
-        WritePruneFile(g, text)
-
-# function in lines 1302-1313. output for pruning
-def WritePruneFile(g : GLOBALS, text : str):
-    output = open(g.outputPruneFile, 'w')
-    text = rec_replace(text, "(", "")
-    text = rec_replace(text, ")", "")
-    text = rec_replace(text, "0", "")
-    text = rec_replace(text, "   ", " ")
-    text = rec_replace(text, "  ", "")
-    text = rec_replace(text, "\"\"","\" \"")
-    output.write(text)
-    output.close()
+# # function in lines 1302-1313. output for pruning
+# def WritePruneFile(g : GLOBALS, text : str):
+#     output = open(g.outputPruneFile, 'w')
+#     text = rec_replace(text, "(", "")
+#     text = rec_replace(text, ")", "")
+#     text = rec_replace(text, "0", "")
+#     text = rec_replace(text, "   ", " ")
+#     text = rec_replace(text, "  ", "")
+#     text = rec_replace(text, "\"\"","\" \"")
+#     output.write(text)
+#     output.close()
 
 # function in lines 588-597. checnk if vowel is in input. 'q' special case, 'rq' special case
 def CheckVowel(input : str, q : int, rq : int) -> int:
