@@ -4,7 +4,6 @@
 class FLAGS:
     DEBUG = False
     parseLevel = 0
-    # pruningFlag = 0
     syllTagFlag = 0
     doubleParseSyl = 0
     directParseFlag = 0
@@ -51,7 +50,6 @@ class GLOBALS:
         self.rootPath = "./"
         self.commonFile = "common"
         self.outputFile = ""
-        self.outputPruneFile = "rag_pho"
 
         self.symbolTable = [['' for _ in range(2)] for _ in range(128)]
         self.ROW = 128
