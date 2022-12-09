@@ -9,17 +9,10 @@ outfolder = 'Generated'
 difforigfolder = 'OriginalDifferences'
 diffgenfolder = 'GeneratedDifferences'
 
-if os.path.exists(outfolder):
-    shutil.rmtree(outfolder)
-os.mkdir(outfolder)
-
-if os.path.exists(difforigfolder):
-    shutil.rmtree(difforigfolder)
-os.mkdir(difforigfolder)
-
-if os.path.exists(diffgenfolder):
-    shutil.rmtree(diffgenfolder)
-os.mkdir(diffgenfolder)
+for fdr in [outfolder, difforigfolder, diffgenfolder]:
+    if os.path.exists(fdr):
+        shutil.rmtree(fdr)
+    os.mkdir(fdr)
 
 flist = os.listdir(infolder)
 flist = sorted(flist)
