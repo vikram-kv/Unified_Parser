@@ -7,6 +7,7 @@ def rec_replace(input : str, sub : str, tar : str):
         output = input.replace(sub, tar)
         if output == input:
             break
+        input = output
     return output
 
 # function - RemoveUnwanted() - referenced in lines 63 - 109 of unified.y
@@ -901,7 +902,7 @@ def WritetoFiles(g : GLOBALS) -> int:
             j = 0
     
         g.words.outputText = g.words.outputText.replace('v', '')
-        g.words.outputText = g.words.outputText.replace()
+        g.words.outputText = g.words.outputText.replace(" \"eu\"","")
         g.words.outputText = g.words.outputText.replace('!', '')
 
     # //syllable
