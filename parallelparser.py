@@ -97,7 +97,7 @@ def wordparse(wd : str):
     parser = yacc()
     parser.g = g
     g.flags.DEBUG = False
-
+    wd = wd.strip(' ') # hidden char
     argv = ['parallelparser.py', wd, '0', '1', '1', '1', '0']
     argc = len(argv)
     if argc <= 5:
