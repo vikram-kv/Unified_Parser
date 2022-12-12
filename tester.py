@@ -16,6 +16,7 @@ for fdr in [outfolder, difforigfolder, diffgenfolder]:
 
 flist = os.listdir(infolder)
 flist = sorted(flist)
+flist = ['lexicon.cls_telugu']
 for fname in flist:
     with open(f'{infolder}/{fname}', 'r') as f:
         cnts = f.readlines()

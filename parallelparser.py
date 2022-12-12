@@ -76,76 +76,45 @@ def p_error(p):
 def printHelp():
 
     print("UnifiedParser : v3.0")
-    print("Usage : ./unified-parser word LangSpecificCorrection WriteFormat ForSylldict IsPruning DirectParse LangId timestamp")
+    print("Usage : ./unified-parser word LangSpecificCorrection WriteFormat ")
     print("LangSpecificCorrection : \n\t0-No\n\t1-Yes")
     print("WriteFormat : \n\t0-Phone\n\t1-Syllable")
-    print("ForSylldict : writes output to wordpronunciationsyldict\n\t0-No\n\t1-Yes")
-    print("IsPruning : writes output for pruning format\n\t0-No\n\t1-Yes")
-    print("DirectParse : No UTF-8 to CLS conversion\n\t0-No\n\t1-Yes")
-    print("LangId : lang id for direct parsing\t0-8")
-    print("timestamp : append this to wordpronunciation\tstring")
 
-    print("Example: ./unified-parser 1 0 0 0 - Monophone parser")
-    print("Example: ./unified-parser 1 1 0 0 - Syllable parser")
-    print("Example: ./unified-parser 1 2 0 0 - Aksharas parser")
-    print("Example: ./unified-parser 1 3 0 0 - Direct parser for USS fallback")
-    print("Example: ./unified-parser 1 4 0 0 - Syllable parser with beg mid end")
+    print("Example: ./unified-parser 1 0 - Monophone parser")
+    print("Example: ./unified-parser 1 1 - Syllable parser")
+    print("Example: ./unified-parser 1 2 - Aksharas parser")
+    print("Example: ./unified-parser 1 3 - Direct parser for USS fallback")
+    print("Example: ./unified-parser 1 4 - Syllable parser with beg mid end")
 
-def wordparse(wd : str):
+def wordparse(wd : str, lsflag : int, wfflag : int):
     g = GLOBALS()
     lexer = Lexer()
     parser = yacc()
     parser.g = g
     g.flags.DEBUG = False
     wd = wd.strip(' ') # hidden char
-    argv = ['parallelparser.py', wd, '0', '1', '1', '1', '0']
-    argc = len(argv)
-    if argc <= 5:
+
+    if lsflag not in [0,1] or wfflag not in [0,1,2,3,4]:
         printHelp()
         exit(1)
     
-    if argv[2] != '1':
-        g.flags.LangSpecificCorrectionFlag = 0
+    g.flags.LangSpecificCorrectionFlag = lsflag
     
-    g.flags.writeFormat = int(argv[3])
-    if argv[3] == '4':
+    g.flags.writeFormat = wfflag
+    if wfflag == 4:
         g.flags.writeFormat = 1
         g.flags.syllTagFlag = 1
     
-    if argv[4] == '1':
-        g.outputFile = 'wordpronunciationsyldict'
-    
-    if argv[5] == '1':
-        g.flags.pruiningFlag = 1
-        g.outputFile = 'wordpronunciation'
-        g.flags.writeFormat = 3
-    
-    if argc > 6 and argv[6] == '1':
-        g.flags.directParseFlag = 1
-        g.langId = int(argv[7])
-    
-    if argc > 8:
-        g.outputFile = 'wordpronunciation' + argv[8]
-    else:
-        g.outputFile = 'wordpronunciation'
-        if argv[4] == '1':
-            g.outputFile = 'wordpronunciationsyldict'
-    
-    word = argv[1]
-    
+    word = wd
     if g.flags.DEBUG:
         print(f'Word : {word}')
 
-    if g.flags.directParseFlag != 1:
-        word = RemoveUnwanted(word)
-
+    word = RemoveUnwanted(word)
     if g.flags.DEBUG:
         print(f'Cleared Word : {word}')
 
     if SetlanguageFeat(g, word) == 0:
         return 0
-    if g.flags.directParseFlag == 1:
-        g.langId = int(argv[7])
     
     if CheckDictionary(g, word) != 0:
         return 0
@@ -153,9 +122,6 @@ def wordparse(wd : str):
         print(f'langId : {g.langId}')
     
     word = ConvertToSymbols(g, word)
-    if g.flags.directParseFlag == 1:
-        g.words.syllabifiedWord = argv[1]
-        print(f'{word}')
 
     if g.flags.DEBUG:
         print(f"Symbols code : {g.words.unicodeWord}")
@@ -233,5 +199,5 @@ if __name__ == '__main__':
         print('Incorrect Usage')
         exit(-1)
 
-    ans = wordparse(sys.argv[1])
+    ans = wordparse(sys.argv[1], 1, 0)
     print(ans)
