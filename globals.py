@@ -39,7 +39,8 @@ class GLOBALS:
         self.BENGALI = 6
         self.GUJARATHI = 7
         self.ODIYA = 8
-        self.ENGLISH = 9
+        self.PUNJABI = 9
+        self.ENGLISH = 10 # new value from 9 to 10
 
         self.langId = 0
         self.isSouth = False

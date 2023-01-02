@@ -118,6 +118,7 @@ def wordparse(wd : str, lsflag : int, wfflag : int):
     
     if CheckDictionary(g, word) != 0:
         return 0
+
     if g.flags.DEBUG:
         print(f'langId : {g.langId}')
     
@@ -199,5 +200,5 @@ if __name__ == '__main__':
         print('Incorrect Usage')
         exit(-1)
 
-    ans = wordparse(sys.argv[1], 1, 0)
+    ans = wordparse(sys.argv[1], 0, 0)
     print(ans)

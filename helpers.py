@@ -15,7 +15,8 @@ def RemoveUnwanted(input : str) -> str:
     # ignore punctuations
     punctuationList = ["!",";",":","@","#","$","%","^","&","*",",",".","/","'","’","”","“","।", "]", "["]
 
-    # replacing problematic unicode characters that look the same but have different encodings
+    # replacing problematic unicode characters that look the same but have different encodings.
+    # punjabi update 
     replaceDict =    {"ऩ":"ऩ", "ऱ":"ऱ", "क़":"क़", "ख़":"ख़", "ग़":"ग़", "ज़":"ज़", "ड़":"ड़", "ढ़":"ढ़", "ढ़":"ढ़", "फ़":"फ़", "य़":"य़", "ऴ":"ऴ",
    "ொ":"ொ", "ோ":"ோ",
    "ൊ":"ൊ", "ോ":"ോ", "ല്‍‌":"ൽ", "ള്‍":"ൾ", "ര്‍":"ർ", "ന്‍":"ൻ", "ണ്‍":"ൺ"}
@@ -48,7 +49,7 @@ def GetFile(g : GLOBALS, LangId : int, type : int) -> str:
 
     langIdNameMapping = { 1 : "malayalam", 2 : "tamil", 3 : "telugu",
         4 : "kannada", 5 : "hindi", 6 : "bengali",
-        7 : "gujarathi", 8 : "odiya", 9 : "english" }
+        7 : "gujarathi", 8 : "odiya", 9 : "punjabi", 10 : "english" }
     
     if LangId in langIdNameMapping.keys():
         fileName += langIdNameMapping[LangId]
@@ -79,6 +80,8 @@ def SetlangId(g : GLOBALS, fl : str):
         g.currLang = g.GUJARATHI; #gujarathi
     elif(id>=2816 and id<=2943):
         g.currLang = g.ODIYA; #odia
+    elif(id>=2560 and id <= 2687): # punjabi
+        g.currLang = g.PUNJABI
     elif(id>=64 and id<=123):
         g.currLang = g.ENGLISH; #english
 
@@ -116,7 +119,6 @@ def SetlanguageFeat(g : GLOBALS, input : str) -> int:
     SetlangId(g, firstLet) # set global langId
     for i in range(len(lines)):
         l = lines[i].strip().split('\t')
-        assert(len(l) == 10)
         g.symbolTable[i][1] = l[1]
         g.symbolTable[i][0] = l[1 + g.langId]
 
