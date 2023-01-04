@@ -92,7 +92,7 @@ def wordparse(wd : str, lsflag : int, wfflag : int):
     parser = yacc()
     parser.g = g
     g.flags.DEBUG = False
-    wd = wd.strip(' ') # hidden char
+    wd = wd.strip('  ') # hidden characters
 
     if lsflag not in [0,1] or wfflag not in [0,1,2,3,4]:
         printHelp()
