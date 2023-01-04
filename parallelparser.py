@@ -199,6 +199,6 @@ if __name__ == '__main__':
     if (len(sys.argv) != 2):
         print('Incorrect Usage')
         exit(-1)
-
-    ans = wordparse(sys.argv[1], 0, 0)
+    
+    ans = wordparse(sys.argv[1], 1, 0)
     print(ans)
