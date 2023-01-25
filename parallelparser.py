@@ -86,7 +86,7 @@ def printHelp():
     print("Example: ./unified-parser 1 3 - Direct parser for USS fallback")
     print("Example: ./unified-parser 1 4 - Syllable parser with beg mid end")
 
-def wordparse(wd : str, lsflag : int, wfflag : int):
+def wordparse(wd : str, lsflag : int, wfflag : int, clearflag : int):
     g = GLOBALS()
     lexer = Lexer()
     parser = yacc()
@@ -192,6 +192,16 @@ def wordparse(wd : str, lsflag : int, wfflag : int):
     SplitSyllables(g,g.words.syllabifiedWordOut)
     
     WritetoFiles(g)
+    if clearflag == 1:
+        t = g.words.outputText
+        t = t.split('"')
+        ln = len(t)
+        i = 1
+        g.answer = ''
+        while i < ln:
+            g.answer += t[i] + ' '
+            i += 2
+        g.answer.strip()
     return g.answer
 
 if __name__ == '__main__':
@@ -200,5 +210,5 @@ if __name__ == '__main__':
         print('Incorrect Usage')
         exit(-1)
     
-    ans = wordparse(sys.argv[1], 0, 0)
+    ans = wordparse(sys.argv[1], 0, 1, 0)
     print(ans)

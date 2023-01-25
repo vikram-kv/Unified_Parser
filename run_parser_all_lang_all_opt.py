@@ -38,7 +38,10 @@ for opt in [0,1,2]:
     for l in langs:
         words = langwdmap[l]
 
-        anslist = Parallel(n_jobs=num_jobs)(delayed(wordparse)(wd, 1, opt) for wd in tqdm(words))
+        if opt == 1:
+            anslist = Parallel(n_jobs=num_jobs)(delayed(wordparse)(wd, 0, opt, 1) for wd in tqdm(words))
+        else:
+            anslist = Parallel(n_jobs=num_jobs)(delayed(wordparse)(wd, 0, opt, 0) for wd in tqdm(words))
 
         with open(f'{out_cur}/{l}.output', 'w') as f:
             for i in range(len(words)):
