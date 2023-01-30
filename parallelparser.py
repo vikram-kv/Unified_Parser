@@ -70,7 +70,7 @@ def p_syltoken1(p):
 
 def p_error(p):
     print('parse error')
-    exit(1)
+    sys.exit(1)
 
 # //print the help of syntax
 def printHelp():
@@ -96,7 +96,7 @@ def wordparse(wd : str, lsflag : int, wfflag : int, clearflag : int):
 
     if lsflag not in [0,1] or wfflag not in [0,1,2,3,4]:
         printHelp()
-        exit(1)
+        sys.exit(1)
     
     g.flags.LangSpecificCorrectionFlag = lsflag
     
@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
     if (len(sys.argv) != 2):
         print('Incorrect Usage')
-        exit(-1)
+        sys.exit(-1)
     
     ans = wordparse(sys.argv[1], 0, 1, 0)
     print(ans)
