@@ -5,6 +5,7 @@ from ply.yacc import yacc
 from globals import *
 from helpers import *
 import sys
+from sys import exit
 
 # tokens used
 tokens = ('kaki_c', 'conjsyll2_c', 'fullvowel_b', 'kaki_a', 'kaki_b',  'conjsyll2_b', 'conjsyll2_a',
@@ -70,7 +71,7 @@ def p_syltoken1(p):
 
 def p_error(p):
     print('parse error')
-    sys.exit(1)
+    exit(1)
 
 # //print the help of syntax
 def printHelp():
@@ -96,7 +97,7 @@ def wordparse(wd : str, lsflag : int, wfflag : int, clearflag : int):
 
     if lsflag not in [0,1] or wfflag not in [0,1,2,3,4]:
         printHelp()
-        sys.exit(1)
+        exit(1)
     
     g.flags.LangSpecificCorrectionFlag = lsflag
     
@@ -208,7 +209,7 @@ if __name__ == '__main__':
 
     if (len(sys.argv) != 2):
         print('Incorrect Usage')
-        sys.exit(-1)
+        exit(-1)
     
     ans = wordparse(sys.argv[1], 0, 1, 0)
     print(ans)
