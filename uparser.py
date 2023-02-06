@@ -76,7 +76,7 @@ def p_error(p):
 def printHelp():
 
     print("UnifiedParser - Usage Instructions")
-    print("main function - wordparse (wd, lsflag, wfflag, clearflag)")
+    print("Run python3 parser.py wd lsflag wfflag clearflag")
     print("wd - word to parse in unicode.")
     print("lsflag - always 0. we are not using this.")
     print("wfflag - 0 for Monophone parsing, 1 for syllable parsing, 2 for Akshara Parsing")
@@ -91,8 +91,8 @@ def wordparse(wd : str, lsflag : int, wfflag : int, clearflag : int):
     g.flags.DEBUG = False
     wd = wd.strip('  ') # hidden characters
 
-    if lsflag not in [0,1] or wfflag not in [0,1,2,3,4]:
-        printHelp()
+    if lsflag not in [0,1] or wfflag not in [0,1,2]:
+        print("Invalid input")
         exit(1)
     
     g.flags.LangSpecificCorrectionFlag = lsflag
@@ -203,9 +203,9 @@ def wordparse(wd : str, lsflag : int, wfflag : int, clearflag : int):
 
 if __name__ == '__main__':
 
-    if (len(sys.argv) != 2):
+    if (len(sys.argv) != 5):
         printHelp()
         exit(-1)
     
-    ans = wordparse(sys.argv[1], 0, 1, 0)
+    ans = wordparse(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]))
     print(ans)

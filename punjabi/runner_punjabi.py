@@ -1,4 +1,4 @@
-from parallelparser import wordparse
+from parser import wordparse
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
