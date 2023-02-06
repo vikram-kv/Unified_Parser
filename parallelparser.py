@@ -72,19 +72,16 @@ def p_error(p):
     print('parse error')
     exit(1)
 
-# //print the help of syntax
+# print the help of syntax
 def printHelp():
 
-    print("UnifiedParser : v3.0")
-    print("Usage : ./unified-parser word LangSpecificCorrection WriteFormat ")
-    print("LangSpecificCorrection : \n\t0-No\n\t1-Yes")
-    print("WriteFormat : \n\t0-Phone\n\t1-Syllable")
+    print("UnifiedParser - Usage Instructions")
+    print("main function - wordparse (wd, lsflag, wfflag, clearflag)")
+    print("wd - word to parse in unicode.")
+    print("lsflag - always 0. we are not using this.")
+    print("wfflag - 0 for Monophone parsing, 1 for syllable parsing, 2 for Akshara Parsing")
+    print("clearflag - 1 for removing the lisp like format of output and to just produce space separated output. Otherwise, 0.")
 
-    print("Example: ./unified-parser 1 0 - Monophone parser")
-    print("Example: ./unified-parser 1 1 - Syllable parser")
-    print("Example: ./unified-parser 1 2 - Aksharas parser")
-    print("Example: ./unified-parser 1 3 - Direct parser for USS fallback")
-    print("Example: ./unified-parser 1 4 - Syllable parser with beg mid end")
 
 def wordparse(wd : str, lsflag : int, wfflag : int, clearflag : int):
     g = GLOBALS()
@@ -207,7 +204,7 @@ def wordparse(wd : str, lsflag : int, wfflag : int, clearflag : int):
 if __name__ == '__main__':
 
     if (len(sys.argv) != 2):
-        print('Incorrect Usage')
+        printHelp()
         exit(-1)
     
     ans = wordparse(sys.argv[1], 0, 1, 0)
