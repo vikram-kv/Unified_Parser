@@ -1,6 +1,6 @@
-# import sys, os
-# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(SCRIPT_DIR)
+import sys, os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(SCRIPT_DIR)
 
 from globals import *
 # contains helper functions used in parser.py
@@ -101,13 +101,142 @@ def SetlangId(g : GLOBALS, fl : str):
 # replacement for function in lins 158 - 213. Sets the lanuage features
 def SetlanguageFeat(g : GLOBALS, input : str) -> int:
 
-    # open common file
-    try:
-        with open(GetFile(g, 0,0), 'r') as infile:
-            lines = infile.readlines()
-    except:
-        print("Couldn't open common file for reading")
-        return 0
+    # # open common file
+    # try:
+    #     with open(GetFile(g, 0,0), 'r') as infile:
+    #         lines = infile.readlines()
+    # except:
+    #     print("Couldn't open common file for reading")
+    #     return 0
+
+    lines = ['0\t$\t#\t#\t#\t#\tऀ\t#\t#\t#\t#\n',
+            '1\tmq\t#\t#\t#\t#\tँ\tঁ\tઁ\tଁ\tਁ\n',
+            '2\tq\tം\tஂ\tం\tಂ\tं\tং\tં\tଂ\tਂ\n',
+            '3\thq\tഃ\tஃ\tః\tಃ\tः\tঃ\tઃ\tଃ\tਃ\n',
+            '4\t$\t#\t#\t#\t#\tऄ\t#\t#\t#\t#\n',
+            '5\ta\tഅ\tஅ\tఅ\tಅ\tअ\tঅ\tઅ\tଅ\tਅ\n',
+            '6\taa\tആ\tஆ\tఆ\tಆ\tआ\tআ\tઆ\tଆ\tਆ\n',
+            '7\ti\tഇ\tஇ\tఇ\tಇ\tइ\tই\tઇ\tଇ\tਇ\n',
+            '8\tii\tഈ\tஈ\tఈ\tಈ\tई\tঈ\tઈ\tଈ\tਈ\n',
+            '9\tu\tഉ\tஉ\tఉ\tಉ\tउ\tউ\tઉ\tଉ\tਉ\n',
+            '10\tuu\tഊ\tஊ\tఊ\tಊ\tऊ\tঊ\tઊ\tଊ\tਊ\n',
+            '11\trq\tഋ\t#\tఋ\tಋ\tऋ\tঋ\tઋ\tଋ\t#\n',
+            '12\t$\t#\t#\t#\t#\tऌ\tঌ\tઌ\tଌ\t#\n',
+            '13\tae\t#\t#\t#\t#\tऍ\t#\tઍ\t#\t#\n',
+            '14\te\tഎ\tஎ\tఎ\tಎ\tऎ\t#\t#\t#\t#\n',
+            '15\tee\tഏ\tஏ\tఏ\tಏ\tए\tএ\tએ\tଏ\tਏ\n',
+            '16\tei\tഐ\tஐ\tఐ\tಐ\tऐ\tঐ\tઐ\tଐ\tਐ\n',
+            '17\tax\t#\t#\t#\t#\tऑ\t#\tઑ\t#\t#\n',
+            '18\to\tഒ\tஒ\tఒ\tಒ\tऒ\t#\t#\t#\t#\n',
+            '19\too\tഓ\tஓ\tఓ\tಓ\tओ\tও\tઓ\tଓ\tਓ\n',
+            '20\tou\tഔ\tஔ\tఔ\tಔ\tऔ\tঔ\tઔ\tଔ\tਔ\n',
+            '21\tk\tക\tக\tక\tಕ\tक\tক\tક\tକ\tਕ\n',
+            '22\tkh\tഖ\t#\tఖ\tಖ\tख\tখ\tખ\tଖ\tਖ\n',
+            '23\tg\tഗ\t#\tగ\tಗ\tग\tগ\tગ\tଗ\tਗ\n',
+            '24\tgh\tഘ\t#\tఘ\tಘ\tघ\tঘ\tઘ\tଘ\tਘ\n',
+            '25\tng\tങ\tங\tఙ\tಙ\tङ\tঙ\tઙ\tଙ\tਙ\n',
+            '26\tc\tച\tச\tచ\tಚ\tच\tচ\tચ\tଚ\tਚ\n',
+            '27\tch\tഛ\t#\tఛ\tಛ\tछ\tছ\tછ\tଛ\tਛ\n',
+            '28\tj\tജ\tஜ\tజ\tಜ\tज\tজ\tજ\tଜ\tਜ\n',
+            '29\tjh\tഝ\t#\tఝ\tಝ\tझ\tঝ\tઝ\tଝ\tਝ\n',
+            '30\tnj\tഞ\tஞ\tఞ\tಞ\tञ\tঞ\tઞ\tଞ\tਞ\n',
+            '31\ttx\tട\tட\tట\tಟ\tट\tট\tટ\tଟ\tਟ\n',
+            '32\ttxh\tഠ\t#\tఠ\tಠ\tठ\tঠ\tઠ\tଠ\tਠ\n',
+            '33\tdx\tഡ\t#\tడ\tಡ\tड\tড\tડ\tଡ\tਡ\n',
+            '34\tdxh\tഢ\t#\tఢ\tಢ\tढ\tঢ\tઢ\tଢ\tਢ\n',
+            '35\tnx\tണ\tண\tణ\tಣ\tण\tণ\tણ\tଣ\tਣ\n',
+            '36\tt\tത\tத\tత\tತ\tत\tত\tત\tତ\tਤ\n',
+            '37\tth\tഥ\t#\tథ\tಥ\tथ\tথ\tથ\tଥ\tਥ\n',
+            '38\td\tദ\t#\tద\tದ\tद\tদ\tદ\tଦ\tਦ\n',
+            '39\tdh\tധ\t#\tధ\tಧ\tध\tধ\tધ\tଧ\tਧ\n',
+            '40\tn\tന\tந\tన\tನ\tन\tন\tન\tନ\tਨ\n',
+            '41\tnd\tഩ\tன\t#\t#\tऩ\t#\t#\t#\t#\n',
+            '42\tp\tപ\tப\tప\tಪ\tप\tপ\tપ\tପ\tਪ\n',
+            '43\tph\tഫ\t#\tఫ\tಫ\tफ\tফ\tફ\tଫ\tਫ\n',
+            '44\tb\tബ\t#\tబ\tಬ\tब\tব\tબ\tବ\tਬ\n',
+            '45\tbh\tഭ\t#\tభ\tಭ\tभ\tভ\tભ\tଭ\tਭ\n',
+            '46\tm\tമ\tம\tమ\tಮ\tम\tম\tમ\tମ\tਮ\n',
+            '47\ty\tയ\tய\tయ\tಯ\tय\tয\tય\tୟ\tਯ\n',
+            '48\tr\tര\tர\tర\tರ\tर\tর\tર\tର\tਰ\n',
+            '49\trx\tറ\tற\t#\t#\tऱ\t#\t#\t#\t#\t\n',
+            '50\tl\tല\tல\tల\tಲ\tल\tল\tલ\tଲ\tਲ\n',
+            '51\tlx\tള\tள\tళ\tಳ\tळ\t#\tળ\tଳ\tਲ਼\n',
+            '52\tzh\tഴ\tழ\t#\t#\tऴ\t#\t#\t#\t#\n',
+            '53\tw\tവ\tவ\tవ\tವ\tव\t#\tવ\tଵ\tਵ\n',
+            '54\tsh\tശ\tஶ\tశ\tಶ\tश\tশ\tશ\tଶ\tਸ਼\n',
+            '55\tsx\tഷ\tஷ\tష\tಷ\tष\tষ\tષ\tଷ\t#\n',
+            '56\ts\tസ\tஸ\tస\tಸ\tस\tস\tસ\tସ\tਸ\n',
+            '57\th\tഹ\tஹ\tహ\tಹ\tह\tহ\tહ\tହ\tਹ\n',
+            '58\t$\t#\t#\t#\t#\tऺ\t#\t#\t#\t#\n',
+            '59\t$\t#\t#\t#\t#\tऻ\t#\t#\t#\t#\n',
+            '60\tnk\t#\t#\t#\t#\t़\t়\t઼\t଼\t਼\n',
+            '61\tag\t#\t#\t#\t#\tऽ\tঽ\tઽ\tଽ\t#\n',
+            '62\taav\tാ\tா\tా\tಾ\tा\tা\tા\tା\tਾ\n',
+            '63\tiv\tി\tி\tి\tಿ\tि\tি\tિ\tି\tਿ\n',
+            '64\tiiv\tീ\tீ\tీ\tೀ\tी\tী\tી\tୀ\tੀ\n',
+            '65\tuv\tു\tு\tు\tು\tु\tু\tુ\tୁ\tੁ\n',
+            '66\tuuv\tൂ\tூ\tూ\tೂ\tू\tূ\tૂ\tୂ\tੂ\n',
+            '67\trqv\tൃ\t#\tృ\tೃ\tृ\tৃ\tૃ\tୃ\t#\n',
+            '68\trqwv\tൄ\t#\tౄ\tೄೄ\tॄ\tৄ\tૄ\t#\t#\n',
+            '69\taev\t#\t#\t#\t#\tॅ\t#\t#\t#\t#\n',
+            '70\tev\tെ\tெ\tె\tೆೆ\tॆ\t#\t#\tୄ\t#\n',
+            '71\teev\tേ\tே\tే\tೇ\tे\tে\tે\tେ\tੇ\n',
+            '72\teiv\tൈ\tை\tై\tೇೈ\tै\tৈ\tૈ\tୈ\tੈ\n',
+            '73\taxv\t#\t#\t#\t#\tॉ\t#\tૉ\t#\t#\n',
+            '74\tov\tൊ\tொ\tొ\tೊ\tॊ\t#\t#\t#\t#\n',
+            '75\toov\tോ\tோ\tో\tೋ\tो\tো\tો\tୋ\tੋ\n',
+            '76\touv\tൌ\tௌ\tౌ\tೌ\tौ\tৌ\tૌ\tୌ\tੌ\n',
+            '77\teu\t്\t்\t్\t್\t्\t্\t્\t୍\t੍\n',
+            '78\ttv\t#\t#\t#\t#\tॎ\tৎ\t#\t#\t#\n',
+            '79\t$\t#\t#\t#\t#\tॏ\t#\t#\t#\t#\n',
+            '80\t$\t#\t#\t#\t#\tॐ\t#\tૐ\t#\tੴ\n',
+            '81\t$\t#\t#\t#\t#\t॓\t#\t#\t#\t#\n',
+            '82\t$\t#\t#\t#\t#\t॔\t#\t#\t#\t#\n',
+            '83\t$\t#\t#\t#\t#\t#\t#\t#\t#\t#\n',
+            '84\t$\t#\t#\t#\t#\t#\t#\t#\t#\t#\n',
+            '85\t$\t#\t#\t#\t#\tॕ\t#\t#\t#\t#\n',
+            '86\t$\t#\t#\t#\t#\tॖ\t#\t#\tୖ\t#\n',
+            '87\tauv\tൗ\t#\t#\t#\tॗ\tৗ\t#\tୗ\t#\n',
+            '88\tkq\t#\t#\t#\t#\tक़\t#\t#\t#\t#\n',
+            '89\tkhq\t#\t#\t#\t#\tख़\t#\t#\t#\tਖ਼\n',
+            '90\tgq\t#\t#\t#\t#\tग़\t#\t#\t#\tਗ਼\n',
+            '91\tz\t#\t#\t#\t#\tज़\t#\t#\t#\tਜ਼\n',
+            '92\tdxq\t#\t#\t#\t#\tड़\tড়\t#\tଡ଼\tੜ\n',
+            '93\tdxhq\t#\t#\t#\t#\tढ़\tঢ়\t#\tଢ଼\t#\n',
+            '94\tf\t#\t#\t#\t#\tफ़\t#\t#\t#\tਫ਼\n',
+            '95\ty\t#\t#\t#\t#\tय़\tয়\t#\tୟ\t#\n',
+            '96\trqw\t#\t#\t#\t#\tॠ\tৠ\tૠ\tୠ\t#\n',
+            '97\t$\t#\t#\t#\t#\tॡ\tৡ\tૡ\tୡ\t#\n',
+            '98\t$\t#\t#\t#\t#\tॢ\tৢ\tૢ\t#\t#\n',
+            '99\t$\t#\t#\t#\t#\tॣ\tৣ\tૣ\tୢ\t#\n',
+            '100\t$\t#\t#\t#\t#\t।\t#\t#\t#\t#\n',
+            '101\t$\t#\t#\t#\t#\t॥\t#\t#\tୣ\t#\n',
+            '102\t$\t#\t#\t#\t#\t०\t০\t૦\t୦\t੦\n',
+            '103\t$\t#\t#\t#\t#\t१\t১\t૧\t୧\t੧\n',
+            '104\t$\t#\t#\t#\t#\t२\t২\t૨\t୨\t੨\n',
+            '105\t$\t#\t#\t#\t#\t३\t৩\t૩\t୩\t੩\t\n',
+            '106\t$\t#\t#\t#\t#\t४\t৪\t૪\t୪\t੪\n',
+            '107\t$\t#\t#\t#\t#\t५\t৫\t૫\t୫\t੫\n',
+            '108\t$\t#\t#\t#\t#\t६\t৬\t૬\t୬\t੬\n',
+            '109\t$\t#\t#\t#\t#\t७\t৭\t૭\t୭\t੭\n',
+            '110\t$\t#\t#\t#\t#\t८\t৮\t૮\t୮\t੮\n',
+            '111\t$\t#\t#\t#\t#\t९\t৯\t૯\t୯\t੯\n',
+            '112\trv\t#\t#\t#\t#\t॰\tৰ\t૰\t୰\t#\n',
+            '113\twv\t#\t#\t#\t#\tॱ\tৱ\t૱\tୱ\t#\n',
+            '114\t$\t#\t#\t#\t#\tॲ\t৲\t#\t୲\t#\n',
+            '115\t$\t#\t#\t#\t#\tॳ\t৳\t#\t୳\t#\n',
+            '116\t$\t#\t#\t#\t#\tॴ\t৴\t#\t୴\t#\n',
+            '117\t$\t#\t#\t#\t#\tॵ\t৵\t#\t୵\t#\n',
+            '118\t$\t#\t#\t#\t#\tॶ\t৶\t#\t୶\t#\n',
+            '119\t$\t#\t#\t#\t#\tॷ\t৷\t#\t୷\t#\n',
+            '120\t$\t#\t#\t#\t#\tॸ\t৸\t#\t#\t#\n',
+            '121\t$\t#\t#\t#\t#\tॹ\t৹\t#\t#\t#\n',
+            '122\tnwv\tൺ\t#\t#\t#\tॺ\t৺\t#\t#\t#\n',
+            '123\tnnv\tൻ\t#\t#\t#\tॻ\t৻\t#\t#\t#\n',
+            '124\trwv\tർ\t#\t#\t#\tॼ\t#\t#\t#\t#\n',
+            '125\tlwv\tൽ\t#\t#\t#\tॽ\t#\t#\t#\t#\n',
+            '126\tlnv\tൾ\t#\t#\t#\tॾ\t#\t#\t#\t#\n',
+            '127\t$\t#\t#\t#\t#\tॿ\t#\t#\t#\t#']
 
     str1 = input
     length = len(str1)

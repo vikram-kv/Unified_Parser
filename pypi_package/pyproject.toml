@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+IITM_indic_unified_parser = ["*.map"]
+
+[project]
+name = "indic_unified_parser"
+version = "1.0.6"
+authors = [
+  { name="Vikram K V", email="vikram.kv2001@gmail.com" },
+]
+description = "The Unified Parser unifies Indian languages using a common label set and syllable structure. It converts text to a common label set, generates phoneme sequences and improves natural language understanding in Indian languages. The method requires basic language knowledge and can achieve more than 95% accuracy with good lexicons. New Indian language parsers can be easily developed using this unified approach."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/vikram-kv/Unified_Parser"
+"Bug Tracker" = "https://github.com/vikram-kv/Unified_Parser/issues"

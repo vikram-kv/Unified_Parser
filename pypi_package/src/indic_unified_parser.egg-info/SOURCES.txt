@@ -1,0 +1,14 @@
+LICENSE
+README.md
+pyproject.toml
+src/indic_unified_parser/__init__.py
+src/indic_unified_parser/globals.py
+src/indic_unified_parser/helpers.py
+src/indic_unified_parser/uparser.py
+src/indic_unified_parser.egg-info/PKG-INFO
+src/indic_unified_parser.egg-info/SOURCES.txt
+src/indic_unified_parser.egg-info/dependency_links.txt
+src/indic_unified_parser.egg-info/top_level.txt
+src/indic_unified_parser/ply/__init__.py
+src/indic_unified_parser/ply/lex.py
+src/indic_unified_parser/ply/yacc.py
