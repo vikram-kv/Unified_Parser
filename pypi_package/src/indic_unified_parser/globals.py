@@ -1,6 +1,9 @@
 # global CONSTANTs for languages. Uses the same values as the enum at 
 # lines 11-13 of unified.y
 
+import sys, os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 class FLAGS:
     DEBUG = False
     parseLevel = 0
@@ -46,8 +49,8 @@ class GLOBALS:
         self.isSouth = False
         self.syllableCount = 0
 
-        self.rootPath = "./"
-        self.commonFile = "common"
+        self.rootPath = SCRIPT_DIR+'/'
+        self.commonFile = "common.map"
         self.outputFile = ""
 
         self.symbolTable = [['' for _ in range(2)] for _ in range(128)]

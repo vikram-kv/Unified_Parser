@@ -1,3 +1,17 @@
+Metadata-Version: 2.1
+Name: indic-unified-parser
+Version: 1.0.6
+Summary: The Unified Parser unifies Indian languages using a common label set and syllable structure. It converts text to a common label set, generates phoneme sequences and improves natural language understanding in Indian languages. The method requires basic language knowledge and can achieve more than 95% accuracy with good lexicons. New Indian language parsers can be easily developed using this unified approach.
+Author-email: Vikram K V <vikram.kv2001@gmail.com>
+Project-URL: Homepage, https://github.com/vikram-kv/Unified_Parser
+Project-URL: Bug Tracker, https://github.com/vikram-kv/Unified_Parser/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # Python_Unified_Parser
 
 This parser attempts to unify the languages based on the Common Label Set. It is designed across all the languages capitalising on the syllable structure of Indian languages. The Unified Parser converts UTF-8 text to common label set, applies letter-to-sound rules and generates the corresponding phoneme sequences. The effort is a step towards natural language understanding system that operates on Indian languages and generates the parsed output. This structured method requires only knowledge of the basic language. With good lexicons it is possible to get more than 95% correctness of words in a language. This method can be further extended for a number of other Indian languages in minimal time and effort. Given the unity in the diversity of Indian languages, developing parsers for new languages is easy using the unified approach. 
