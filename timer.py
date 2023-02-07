@@ -1,5 +1,5 @@
 import os, shutil
-from parallelparser import wordparse
+from uparser import wordparse
 import time
 
 infolder = 'Original'
